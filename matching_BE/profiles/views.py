@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from .models import *
 import json
@@ -11,17 +11,46 @@ def create_profile(request):
         new_profile = Member.objects.create(
             member_id = body['member_id'],
             member_pw = body['member_pw'],
-            nickname = body['name'],
+            nickname = body['nickname'],
             major = body['major'],
             gender = body['gender'],
             self_intro = body['self_intro']
         )
 
+        new_profile_json = {
+            "member_id" : new_profile.member_id,
+            "member_pw" : new_profile.member_pw,
+            "nickname" : new_profile.nickname,
+            "major" : new_profile.major,
+            "gender" : new_profile.gender,
+            "self_intro" : new_profile.self_intro
+        }
         return JsonResponse({
-            "status" : 200
+            "data" : new_profile_json
         })
 
     else:
         return JsonResponse({
             "status" : 405
         })
+
+
+def delete_profile(requests, id):
+    if requests.method =="DELETE":
+        delete_profile = get_object_or_404(Member, pk=id)
+        # 특정 profile Delete
+        delete_profile.delete()
+
+        return JsonResponse({
+                'status': 200,
+                'success': True,
+                'message': 'Delete 성공!',
+                'data': None
+            })
+    else:
+        return JsonResponse({
+                'status': 405,
+                'success': False,
+                'message': 'Delete error',
+                'data': None
+            })
