@@ -58,6 +58,7 @@ DJANGO_APPS = [
 
 PROJECT_APPS = [ 
     'profiles',
+    'accounts',
 ]
 
 THIRD_PARTY_APPS = [ 
@@ -149,3 +150,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR/'media'
