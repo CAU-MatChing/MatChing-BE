@@ -39,6 +39,16 @@ def get_secret(setting, secrets=secrets):
 SECRET_KEY = get_secret("SECRET_KEY")
 
 
+# email info
+EMAIL_BACKEND = get_secret("EMAIL_BACKEND")
+EMAIL_HOST = get_secret("EMAIL_HOST")
+EMAIL_HOST_USER = get_secret("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = get_secret("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = get_secret("EMAIL_USE_TLS")
+EMAIL_PORT = get_secret("EMAIL_PORT")
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -62,7 +72,7 @@ PROJECT_APPS = [
 ]
 
 THIRD_PARTY_APPS = [ 
-
+    
 ]
 
 INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS + THIRD_PARTY_APPS
