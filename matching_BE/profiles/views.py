@@ -4,26 +4,29 @@ from .models import *
 import json
 
 # Create your views here.
-def create_profile(request):
+def create_profile(request, account_id):
     if request.method == 'POST':
         body = json.loads(request.body.decode('utf-8'))
 
-        new_profile = Member.objects.create(
-            member_id = body['member_id'],
-            member_pw = body['member_pw'],
+        new_profile = Profile.objects.create(   
+            account = get_object_or_404(Account,pk=account_id),
             nickname = body['nickname'],
             major = body['major'],
             gender = body['gender'],
-            self_intro = body['self_intro']
+            bio = body['bio'],
+            
+            rudeness = 0
+	        noshow = 0
+	        cancel = 0
+	        matching_num = 0
+	        matching_people = 0
+	        is_disabled = False
+	        release_date = dafault=''
         )
 
         new_profile_json = {
-            "member_id" : new_profile.member_id,
-            "member_pw" : new_profile.member_pw,
-            "nickname" : new_profile.nickname,
-            "major" : new_profile.major,
-            "gender" : new_profile.gender,
-            "self_intro" : new_profile.self_intro
+
+
         }
         return JsonResponse({
             "data" : new_profile_json
@@ -35,9 +38,9 @@ def create_profile(request):
         })
 
 
-def delete_profile(requests, id):
+def delete_profile(requests, account_id):
     if requests.method =="DELETE":
-        delete_profile = get_object_or_404(Member, pk=id)
+        delete_profile = get_object_or_404(Profile, pk=id)
         # 특정 profile Delete
         delete_profile.delete()
 

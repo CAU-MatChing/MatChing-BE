@@ -69,6 +69,7 @@ DJANGO_APPS = [
 PROJECT_APPS = [ 
     'profiles',
     'accounts',
+    'matzips',
 ]
 
 THIRD_PARTY_APPS = [ 
