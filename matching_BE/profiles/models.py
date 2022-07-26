@@ -3,7 +3,7 @@ from accounts.models import Account
 
 # Create your models here.
 class Profile(models.Model):
-	account = models.ForeignKey(Account, on_delete=models.CASCADE)
+	account = models.OneToOneField(Account, on_delete=models.CASCADE)
 	nickname = models.CharField(max_length=18, unique=True)
 	major = models.CharField(max_length=30)
 	gender = models.CharField(max_length=1)
