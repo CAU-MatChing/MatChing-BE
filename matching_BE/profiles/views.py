@@ -15,13 +15,13 @@ def create_profile(request, account_id):
             gender = body['gender'],
             bio = body['bio'],
             
-            rudeness = 0
-	        noshow = 0
-	        cancel = 0
-	        matching_num = 0
-	        matching_people = 0
-	        is_disabled = False
-	        release_date = dafault=''
+            rudeness = 0,
+	        noshow = 0,
+	        cancel = 0,
+	        matching_num = 0,
+	        matching_people = 0,
+	        is_disabled = False,
+	        release_date = ''
         )
 
         new_profile_json = {
