@@ -22,4 +22,5 @@ urlpatterns = [
     path('profile/', include('profiles.urls')),
     path('account/', include('accounts.urls')),
     path('matzip/', include('matzips.urls')),
+    path('matching/',include('matchings.urls')),
 ]
