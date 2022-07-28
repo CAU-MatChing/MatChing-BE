@@ -21,21 +21,27 @@ def create_profile(request, account_id):
 	        matching_num = 0,
 	        matching_people = 0,
 	        is_disabled = False,
-	        release_date = ''
+	        release_date = '2022-7-28'
         )
 
         new_profile_json = {
-
-
+            "account" : new_profile.account.email,
+            "nickname" : new_profile.nickname,
+            "major" : new_profile.major,
+            "gender" : new_profile.gender,
+            "bio" : new_profile.bio
         }
+
         return JsonResponse({
+            "status":200,
+            "message" : "프로필 생성 성공",
             "data" : new_profile_json
         })
 
-    else:
-        return JsonResponse({
-            "status" : 405
-        })
+    # else:
+    #     return JsonResponse({
+    #         "status" : 405
+    #     })
 
 
 def delete_profile(requests, account_id):
