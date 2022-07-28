@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 # cy : change email, password null=True
 
 # 수정해야댐
-class MyUserManager(BaseUserManager):
+class MyAccountManager(BaseUserManager):
     def create_user(self, email, password=None):
         if not email:
             raise ValueError('이메일 주소가 필요합니다.')
@@ -38,7 +38,7 @@ class Account(AbstractBaseUser):
     is_active = models.BooleanField(default=False)
     is_admin = models.BooleanField(verbose_name='관리자 권한',default=False)
 
-    objects = MyUserManager()
+    objects = MyAccountManager()
 
     USERNAME_FIELD = 'email'
 

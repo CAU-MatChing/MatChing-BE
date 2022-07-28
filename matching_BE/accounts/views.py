@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 # cy : import
-from .models    import Account
+from .models    import *
 from .tokens    import account_activation_token
 from .text  import message
 from matching_BE.settings   import *
@@ -31,18 +31,18 @@ class SignUp(View):
         try:
             # 이메일 유효성을 검사(메세지를 받을 수 있는 이메일인가?)
             validate_email(body["email"])
+            email     = body["email"]
+            password  = body["password"]
             
             # email에 @cau.ac.kr로 끝나지 않으면 에러메세지 반환하는 코드를 추가
+            if "@cau.ac.kr" not in email:
+                return JsonResponse({"message" : "BAD_EMAIL"}, status=400)
             
-            user = Account.objects.create(
-                email     = body["email"],
-                password  = body["password"],
-                is_active = False 
-            )
+            # 디비에 저장
+            user = Account.objects.create_user(email, password)
             
-            # 메세지 내용 추가
-            #message_data = "메일 보내기 연습 본문입니다."
             
+            # 이메일 보내기
             current_site = get_current_site(request) 
             domain       = current_site.domain
             uidb64       = urlsafe_base64_encode(force_bytes(user.pk))
