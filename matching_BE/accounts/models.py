@@ -33,7 +33,7 @@ class MyUserManager(BaseUserManager):
         return user
 
 class Account(AbstractBaseUser):
-    email = models.CharField(max_length=50,unique=True,null=True)
+    email = models.EmailField(verbose_name='이메일주소',max_length=255,unique=True,null=True)
     # password = models.CharField(max_length=20,null=True)
     is_active = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
