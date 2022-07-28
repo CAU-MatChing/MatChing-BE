@@ -15,7 +15,7 @@ class Profile(models.Model):
 	matching_num = models.IntegerField(default=0)
 	matching_people = models.IntegerField(default=0)
 	is_disabled = models.BooleanField(default=False)
-	release_date = models.CharField(max_length=10, default='', blank=True, null=True)
+	release_date = models.DateField()
  
  
 	
