@@ -4,12 +4,12 @@ from .models import *
 import json
 
 # Create your views here.
-def create_profile(request, account_id):
+def create_profile(request):
     if request.method == 'POST':
         body = json.loads(request.body.decode('utf-8'))
-
+       
         new_profile = Profile.objects.create(   
-            account = get_object_or_404(Account,pk=account_id),
+            account = request.user,
             nickname = body['nickname'],
             major = body['major'],
             gender = body['gender'],
@@ -38,10 +38,10 @@ def create_profile(request, account_id):
             "data" : new_profile_json
         })
 
-    # else:
-    #     return JsonResponse({
-    #         "status" : 405
-    #     })
+    else:
+        return JsonResponse({
+            "status" : 405
+        })
 
 
 def delete_profile(requests, account_id):

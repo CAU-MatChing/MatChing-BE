@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 
-# Create your models here.
 # cy : change email, password null=True
 
 # 수정해야댐

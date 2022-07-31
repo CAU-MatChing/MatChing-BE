@@ -13,8 +13,6 @@ from django.core.exceptions import ValidationError
 
 from accounts.models import Account
 
-
-
 class UserCreationForm(forms.ModelForm):
     """A form for creating new users. Includes all the required
     fields, plus a repeated password."""
@@ -67,11 +65,12 @@ class UserAdmin(BaseUserAdmin):
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
-    list_display = ('email', 'is_admin')
-    list_filter = ('is_admin',)
+    list_display = ('email','is_active','is_admin',)
+    list_filter = ('is_active','is_admin',)
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Permissions', {'fields': ('is_admin',)}),
+        ('Permissions(계정 권한)', {'fields': ('is_admin',)}),
+        ('Activation Status(활성화 여부)', {'fields': ('is_active',)}),
     )
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
     # overrides get_fieldsets to use this attribute when creating a user.
@@ -92,3 +91,4 @@ admin.site.unregister(Account)
 admin.site.register(Account, UserAdmin)
 # ... and, since we're not using Django's built-in permissions,
 # unregister the Group model from admin.
+

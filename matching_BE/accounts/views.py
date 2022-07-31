@@ -1,6 +1,3 @@
-from django.shortcuts import render
-
-# cy : import
 from .models    import *
 from .tokens    import account_activation_token
 from .text  import message
@@ -16,10 +13,10 @@ from django.http                     import JsonResponse
 from django.core.exceptions          import ValidationError
 from django.core.validators          import validate_email
 from django.contrib.sites.shortcuts  import get_current_site
-from django.shortcuts                import redirect
+from django.shortcuts                import render, redirect
 from django.utils.encoding           import force_bytes, force_str
 from django.utils.http               import urlsafe_base64_encode,urlsafe_base64_decode
-
+from django.contrib.auth             import login as auth_login, logout as auth_logout,authenticate
 import smtplib
 from email.mime.text import MIMEText
 
@@ -95,3 +92,31 @@ class Activate(View):
             return JsonResponse({"message" : "TYPE_ERROR"}, status=400)
         except KeyError:
             return JsonResponse({"message" : "INVALID_KEY"}, status=400)
+
+
+def login(request) :
+    if request.method == 'POST':
+        body = json.loads(request.body.decode('UTF-8'))
+
+        email = body['email']
+        password = body['password']
+        user = authenticate(request,email=email,password=password)
+
+        if user is not None:
+            auth_login(request,user)
+            return JsonResponse({
+                "status" : 200
+            })
+        else:
+            return JsonResponse({
+                "status" : 400,
+                "message" : "로그인 실패"
+            })
+
+def logout(request):
+    auth_logout(request)
+    
+    return JsonResponse({
+        "status" : 200,
+        "message" : "로그아웃!"
+    })
