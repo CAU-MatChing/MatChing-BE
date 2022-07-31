@@ -5,12 +5,12 @@ import json
 
 # Create your views here.
 # postman으로 확인은 안함
-def create_matching(request, leader_id, matzip_id):
+def create_matching(request, matzip_id):
     if request.method == 'POST':
         body = json.loads(request.body.decode('utf-8'))
         
         new_matching = Matching.objects.create(
-            leader = get_object_or_404(Profile, pk=leader_id),
+            leader = request.user.profile,
             matzip = get_object_or_404(Matzip, pk=matzip_id),
     
             #created_time = models.DateTimeField(auto_now_add=True)
@@ -32,10 +32,10 @@ def create_matching(request, leader_id, matzip_id):
             "leader" : new_matching.leader.nickname,
             "matzip" : new_matching.matzip.name,
             "created_time" : new_matching.created_time,
-            "is_matched" : new_matching.is_matching,
+            "is_matched" : new_matching.is_matched,
             "is_closed" : new_matching.is_closed,
             "bio" : new_matching.bio,
-            "social_mode" : new_matching.social.mode,
+            "social_mode" : new_matching.social_mode,
             "desired_gender" : new_matching.desired_gender,
             "desired_major" : new_matching.desired_major,
             "min_people" : new_matching.min_people,
@@ -52,3 +52,23 @@ def create_matching(request, leader_id, matzip_id):
         return JsonResponse({
             "status" : 405
         })
+        
+
+def delete_matching(request, matching_id):
+    if request.method =="DELETE":
+        delete_matching = get_object_or_404(Matching, pk=matching_id)
+        delete_matching.delete()
+
+        return JsonResponse({
+                'status': 200,
+                'success': True,
+                'message': 'Delete 성공!',
+                'data': None
+            })
+    else:
+        return JsonResponse({
+                'status': 405,
+                'success': False,
+                'message': 'Delete error',
+                'data': None
+            })
