@@ -7,7 +7,7 @@ import json
 def create_profile(request):
     if request.method == 'POST':
         body = json.loads(request.body.decode('utf-8'))
-        print(request.user)
+       
         new_profile = Profile.objects.create(   
             account = request.user,
             nickname = body['nickname'],

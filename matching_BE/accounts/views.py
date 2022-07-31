@@ -113,3 +113,10 @@ def login(request) :
                 "message" : "로그인 실패"
             })
 
+def logout(request):
+    auth_logout(request)
+    
+    return JsonResponse({
+        "status" : 200,
+        "message" : "로그아웃!"
+    })
