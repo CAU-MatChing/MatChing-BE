@@ -3,8 +3,6 @@ from .views import *
 
 urlpatterns = [ 
     path('create-matching/<int:matzip_id>', create_matching, name='create-matching'),
-    path('delete-matching/<int:matching_id>', delete_matching, name='delete-matching'),
-    # path('update-matching/<int:id>', update_matching, name='update-matching'),
-    # path('get-matching/<int:id>', get_matching, name='get-matching'),
+    path('<int:matching_id>', read_update_delete_matching, name='read_update_delete_matching'),
     # path('get-all-matching/', get_all_matching, name='get-all-matching'),
 ]
