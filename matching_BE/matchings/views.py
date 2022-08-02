@@ -4,15 +4,14 @@ from django.http import JsonResponse,HttpResponse
 from .models import Matching, Follower
 from profiles.models import Profile
 from matzips.models import Matzip
+from datetime import datetime, timedelta
 import json
 
 def create_matching(request, matzip_id):
     if request.method == 'POST':
         body = json.loads(request.body.decode('utf-8'))
         cur_matzip = get_object_or_404(Matzip, pk=matzip_id)
-        cur_matzip.waiting+=1
-        cur_matzip.save()
-
+        
         new_matching = Matching.objects.create(
             leader = request.user.profile,
             matzip = cur_matzip,
@@ -22,15 +21,17 @@ def create_matching(request, matzip_id):
             desired_major = body['desired_major'],
             min_people = body['min_people'],
             max_people = body['max_people'],
-            date = body['date'],
-            start_time =body['start_time'],
-            end_time = body['end_time']
+            start_time = datetime.strptime(body['start_time'], "%Y-%m-%d %H:%M"),
+            end_time = datetime.strptime(body['end_time'], "%Y-%m-%d %H:%M")
         )
         
+        cur_matzip.waiting+=1
+        cur_matzip.save()
+
         new_matching_json = {
             "leader" : new_matching.leader.nickname,
             "matzip" : new_matching.matzip.name,
-            "created_time" : new_matching.created_time,
+            "created_time" : new_matching.created_time.strftime("%Y-%m-%d %H:%M:%S"),
             "is_matched" : new_matching.is_matched,
             "is_closed" : new_matching.is_closed,
             "bio" : new_matching.bio,
@@ -39,9 +40,8 @@ def create_matching(request, matzip_id):
             "desired_major" : new_matching.desired_major,
             "min_people" : new_matching.min_people,
             "max_people" : new_matching.max_people,
-            "date" : new_matching.date,
-            "start_time" : new_matching.start_time,
-            "end_time" : new_matching.end_time
+            "start_time" : new_matching.start_time.strftime("%Y-%m-%d %H:%M"),
+            "end_time" : new_matching.end_time.strftime("%Y-%m-%d %H:%M")
         }
 
         json_res = json.dumps(
@@ -76,9 +76,9 @@ def read_update_delete_matching(request, matching_id):
 
         for follower in follower_all :
             follower_json = {
-                "nickname" : follower.nickname,
-                "major" : follower.major,
-                "gender" : follower.gender
+                "nickname" : follower.profile.nickname,
+                "major" : follower.profile.major,
+                "gender" : follower.profile.gender
                 # 신고 횟수도 반환해야 함
             }
             follower_json_all.append(follower_json)
@@ -88,7 +88,7 @@ def read_update_delete_matching(request, matching_id):
             "matzip" : get_matching.matzip.name,
             "bio" : get_matching.bio,
             "leader" : get_matching.leader.nickname,
-            "created_time" : get_matching.created_time.strftime("%Y/%m/%d, %H:%M:%S"),
+            "created_time" : get_matching.created_time.strftime("%Y-%m-%d %H:%M:%S"),
             "remain" : get_matching.max_people-len(follower_json_all),
             "is_matched" : get_matching.is_matched,
             "is_closed" : get_matching.is_closed,
@@ -97,9 +97,8 @@ def read_update_delete_matching(request, matching_id):
             "desired_major" : get_matching.desired_major,
             "min_people" : get_matching.min_people,
             "max_people" : get_matching.max_people,
-            "date" : get_matching.date,
-            "start_time" : get_matching.start_time,
-            "end_time" : get_matching.end_time,
+            "start_time" : get_matching.start_time.strftime("%Y-%m-%d %H:%M"),
+            "end_time" : get_matching.end_time.strftime("%Y-%m-%d %H:%M"),
 			"followers": follower_json_all 
         }
         
@@ -147,9 +146,8 @@ def read_update_delete_matching(request, matching_id):
                 "desired_major" : update_matching.desired_major,
                 "min_people" : update_matching.min_people,
                 "max_people" : update_matching.max_people,
-                "date" : update_matching.date,
-                "start_time" : update_matching.start_time,
-                "end_time" : update_matching.end_time
+                "start_time" : update_matching.start_time.strftime("%Y-%m-%d %H:%M"),
+                "end_time" : update_matching.end_time.strftime("%Y-%m-%d %H:%M"),
             }
 
             json_res = json.dumps(
@@ -189,9 +187,10 @@ def read_update_delete_matching(request, matching_id):
     elif request.method =="DELETE":
         delete_matching = get_object_or_404(Matching, pk=matching_id)
         cur_matzip = get_object_or_404(Matzip, pk=delete_matching.matzip.id)
+        delete_matching.delete()
+        
         cur_matzip.waiting-=1
         cur_matzip.save()
-        delete_matching.delete()
 
         json_res = json.dumps(
             {
@@ -215,5 +214,108 @@ def read_update_delete_matching(request, matching_id):
                 'status': 405,
                 'success': False,
                 'message': 'Method Error',
+                'data': None
+            })
+
+@require_http_methods(['POST','DELETE'])
+def join_cancel_matching(request, matching_id):
+    # 팔로워가 매칭을 신청하는 코드
+    if request.method == 'POST':
+        # body = json.loads(request.body.decode('utf-8'))
+        cur_matching = get_object_or_404(Matching, pk=matching_id)
+        
+        new_follower = Follower.objects.create(
+            matching = cur_matching,
+            profile = request.user.profile,
+        )
+
+        follower_all = Follower.objects.filter(matching = cur_matching)
+
+        if cur_matching.min_people <= len(follower_all):
+            cur_matching.is_matched = True
+        else:
+            cur_matching.is_matched = False
+            
+        if cur_matching.max_people <= len(follower_all):
+            cur_matching.is_closed = True
+        else:
+            cur_matching.is_closed = False
+        
+        cur_matching.save()
+
+        new_follower_json = {
+            "matching_id" : matching_id,
+            "nickname" : new_follower.profile.nickname,
+            "gender" : new_follower.profile.gender,
+            "major" : new_follower.profile.major
+        }
+
+        json_res = json.dumps(
+            {
+                "status": 200,
+                "success": True,
+                "message": "매칭 신청 성공",
+                "data": new_follower_json
+            },
+            ensure_ascii=False
+        )
+            
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=200
+        )
+
+    
+    # 팔로워가 매칭을 취소하는 코드
+    elif request.method == 'DELETE':
+        cur_matching = get_object_or_404(Matching, pk=matching_id)
+        cur_follower = get_object_or_404(Follower, profile=request.user.profile, matching = cur_matching)
+
+        time_now = datetime.now() 
+        time_limit = cur_matching.start_time + timedelta(hours=-1)
+        
+
+        if time_now < time_limit:
+            cur_follower.delete()           
+            
+            follower_all = Follower.objects.filter(matching = cur_matching)
+            if cur_matching.min_people <= len(follower_all):
+                cur_matching.is_matched = True
+            else:
+                cur_matching.is_matched = False
+                
+            if cur_matching.max_people <= len(follower_all):
+                cur_matching.is_closed = True
+            else:
+                cur_matching.is_closed = False
+
+            cur_matching.save()
+
+            cur_profile = get_object_or_404(Profile, account = request.user)
+            cur_profile.cancel+=1
+            cur_profile.save()
+            
+            json_res = json.dumps(
+                {
+                    "status": 200,
+                    "success": True,
+                    "message": "삭제 성공",
+                    "data": None
+                },
+                ensure_ascii=False
+            )
+            
+            return HttpResponse(
+                json_res,
+                content_type=u"application/json; charset=utf-8",
+                status=200
+            )
+            
+        else:
+            return JsonResponse({
+                'status': 400,
+                'success': False,
+                'message': '매칭 취소 시간 지남',
                 'data': None
             })

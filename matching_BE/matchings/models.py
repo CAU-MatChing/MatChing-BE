@@ -16,12 +16,10 @@ class Matching(models.Model):
     desired_major = models.CharField(max_length=30,default='',null=True,blank=True)
     min_people = models.IntegerField(default=1)
     max_people = models.IntegerField(default=1)
-    date = models.CharField(max_length=10)
-    start_time = models.CharField(max_length=5, default='00:00')
-    end_time = models.CharField(max_length=5, default='00:00')
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
 
 
 class Follower(models.Model):
     matching = models.ForeignKey(Matching, on_delete=models.CASCADE)
-    # matzip = models.ForeignKey(Matzip, on_delete=models.CASCADE)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
