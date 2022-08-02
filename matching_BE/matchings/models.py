@@ -19,3 +19,9 @@ class Matching(models.Model):
     date = models.CharField(max_length=10)
     start_time = models.CharField(max_length=5, default='00:00')
     end_time = models.CharField(max_length=5, default='00:00')
+
+
+class Follower(models.Model):
+    matching = models.ForeignKey(Matching, on_delete=models.CASCADE)
+    # matzip = models.ForeignKey(Matzip, on_delete=models.CASCADE)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
