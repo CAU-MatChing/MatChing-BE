@@ -12,6 +12,10 @@ def create_matching(request, matzip_id):
         body = json.loads(request.body.decode('utf-8'))
         cur_matzip = get_object_or_404(Matzip, pk=matzip_id)
         
+        start = datetime.strptime(body['start_time'], "%Y-%m-%d %H:%M")
+        sum = body['duration']
+        end = start + timedelta(minutes=+sum)
+        
         new_matching = Matching.objects.create(
             leader = request.user.profile,
             matzip = cur_matzip,
@@ -21,8 +25,9 @@ def create_matching(request, matzip_id):
             desired_major = body['desired_major'],
             min_people = body['min_people'],
             max_people = body['max_people'],
-            start_time = datetime.strptime(body['start_time'], "%Y-%m-%d %H:%M"),
-            end_time = datetime.strptime(body['end_time'], "%Y-%m-%d %H:%M")
+            start_time = start,
+            end_time = end,
+            duration = body['duration']
         )
         
         cur_matzip.waiting+=1
@@ -41,7 +46,8 @@ def create_matching(request, matzip_id):
             "min_people" : new_matching.min_people,
             "max_people" : new_matching.max_people,
             "start_time" : new_matching.start_time.strftime("%Y-%m-%d %H:%M"),
-            "end_time" : new_matching.end_time.strftime("%Y-%m-%d %H:%M")
+            "end_time" : new_matching.end_time.strftime("%Y-%m-%d %H:%M"),
+            "duration" : new_matching.duration
         }
 
         json_res = json.dumps(
@@ -99,6 +105,7 @@ def read_update_delete_matching(request, matching_id):
             "max_people" : get_matching.max_people,
             "start_time" : get_matching.start_time.strftime("%Y-%m-%d %H:%M"),
             "end_time" : get_matching.end_time.strftime("%Y-%m-%d %H:%M"),
+            "duration" : get_matching.duration,
 			"followers": follower_json_all 
         }
         
@@ -130,7 +137,6 @@ def read_update_delete_matching(request, matching_id):
             update_matching.desired_major = body['desired_major']
             update_matching.min_people = body['min_people']
             update_matching.max_people = body['max_people']
-            update_matching.date = body['date']
             update_matching.start_time = body['start_time']
             update_matching.end_time = body['end_time']
 
@@ -223,11 +229,32 @@ def join_cancel_matching(request, matching_id):
     if request.method == 'POST':
         # body = json.loads(request.body.decode('utf-8'))
         cur_matching = get_object_or_404(Matching, pk=matching_id)
+       
+        cur_user_profile = request.user.profile
         
+        if(cur_matching.desired_gender == 'F' or cur_matching.desired_gender == 'M'):
+            if(cur_matching.desired_gender != cur_user_profile.gender):
+                return JsonResponse({
+                    'status': 400,
+                    'success': False,
+                    'message': '성별조건불일치',
+                    'data': None
+                })
+        if(cur_matching.desired_major != '무관'):
+            if(cur_matching.desired_major != cur_user_profile.major):
+                return JsonResponse({
+                    'status': 400,
+                    'success': False,
+                    'message': '전공조건불일치',
+                    'data': None
+                })
+       
+       
         new_follower = Follower.objects.create(
             matching = cur_matching,
             profile = request.user.profile,
         )
+
 
         follower_all = Follower.objects.filter(matching = cur_matching)
 

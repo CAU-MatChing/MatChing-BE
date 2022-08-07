@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse,HttpResponse
 from .models import *
+from matchings.models import *
 import json
 
 @require_http_methods(['POST','GET'])
@@ -143,3 +144,57 @@ def update_matzip(request, id):
                 'data': None
             })
         
+def getall_now_matzip(request):
+    if request.method == "GET":
+        now_matzip_all = Matzip.objects.all()
+
+        now_matzip_json_all = []
+        for now_matzip in now_matzip_all:
+            now_matching_all = Matching.objects.filter(matzip = now_matzip.id, is_closed = False)
+            
+            now_matching_json_all=[]
+            for now_matching in now_matching_all:
+                now_follower_all = Follower.objects.filter(matching = now_matching.id)
+                
+                now_follower_json_all=[]
+                for now_follower in now_follower_all:
+                    now_follower_json_all.append(now_follower.profile.nickname)
+                
+                now_matching_json = {
+                    "matching_id" : now_matching.id,
+                    "matzip" : now_matching.matzip.name,
+                    "bio" : now_matching.bio,
+                    "leader" : now_matching.leader.nickname,
+                    "created_time" : now_matching.created_time.strftime("%Y-%m-%d %H:%M:%S"),
+                    "remain" : now_matching.max_people-len(now_follower_json_all),
+                    "is_matched" : now_matching.is_matched,
+                    "is_closed" : now_matching.is_closed,
+                    "social_mode" : now_matching.social_mode,
+                    "desired_gender" : now_matching.desired_gender,
+                    "desired_major" : now_matching.desired_major,
+                    "min_people" : now_matching.min_people,
+                    "max_people" : now_matching.max_people,
+                    "start_time" : now_matching.start_time.strftime("%Y-%m-%d %H:%M"),
+                    "end_time" : now_matching.end_time.strftime("%Y-%m-%d %H:%M"),
+			        "followers": now_follower_json_all 
+                }
+                now_matching_json_all.append(now_matching_json)
+                
+            now_matzip_json = {
+                "name" : now_matzip.name,
+                "location" : now_matzip.location,
+                "waiting" : now_matzip.waiting,
+                "matchings" : now_matching_json_all
+            }
+            now_matzip_json_all.append(now_matzip_json)
+        
+        return JsonResponse({
+            "data" : now_matzip_json_all
+        })
+    else:
+        return JsonResponse({
+                'status': 405,
+                'success': False,
+                'message': 'Get error',
+                'data': None
+            })

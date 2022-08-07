@@ -18,6 +18,7 @@ class Matching(models.Model):
     max_people = models.IntegerField(default=1)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+    duration = models.IntegerField(default=1)
 
 
 class Follower(models.Model):
