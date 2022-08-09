@@ -143,21 +143,21 @@ def get_my_matchings(request):
                 matching_json_all.append(matching_json)
 
                 
-                json_res = json.dumps(
-                    {
-                        "status": 200,
-                        "success": True,
-                        "message": "조회 성공",
-                        "data": matching_json_all
-                    },
-                    ensure_ascii=False
-                )
+            json_res = json.dumps(
+                {
+                    "status": 200,
+                    "success": True,
+                    "message": "조회 성공",
+                    "data": matching_json_all
+                },
+                ensure_ascii=False
+            )
                 
-                return HttpResponse(
-                    json_res,
-                    content_type=u"application/json; charset=utf-8",
-                    status=200
-                )
+            return HttpResponse(
+                json_res,
+                content_type=u"application/json; charset=utf-8",
+                status=200
+            )
                 
         
         else:
