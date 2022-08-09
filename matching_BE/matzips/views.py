@@ -176,6 +176,7 @@ def getall_now_matzip(request):
                     "max_people" : now_matching.max_people,
                     "start_time" : now_matching.start_time.strftime("%Y-%m-%d %H:%M"),
                     "end_time" : now_matching.end_time.strftime("%Y-%m-%d %H:%M"),
+                    "duration" : now_matching.duration,
 			        "followers": now_follower_json_all 
                 }
                 now_matching_json_all.append(now_matching_json)

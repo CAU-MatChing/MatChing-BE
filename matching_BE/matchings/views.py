@@ -9,62 +9,74 @@ import json
 
 def create_matching(request, matzip_id):
     if request.method == 'POST':
-        body = json.loads(request.body.decode('utf-8'))
-        cur_matzip = get_object_or_404(Matzip, pk=matzip_id)
-        
-        start = datetime.strptime(body['start_time'], "%Y-%m-%d %H:%M")
-        sum = body['duration']
-        end = start + timedelta(minutes=+sum)
-        
-        new_matching = Matching.objects.create(
-            leader = request.user.profile,
-            matzip = cur_matzip,
-            bio = body['bio'],
-            social_mode = body['social_mode'],
-            desired_gender = body['desired_gender'],
-            desired_major = body['desired_major'],
-            min_people = body['min_people'],
-            max_people = body['max_people'],
-            start_time = start,
-            end_time = end,
-            duration = body['duration']
-        )
-        
-        cur_matzip.waiting+=1
-        cur_matzip.save()
-
-        new_matching_json = {
-            "leader" : new_matching.leader.nickname,
-            "matzip" : new_matching.matzip.name,
-            "created_time" : new_matching.created_time.strftime("%Y-%m-%d %H:%M:%S"),
-            "is_matched" : new_matching.is_matched,
-            "is_closed" : new_matching.is_closed,
-            "bio" : new_matching.bio,
-            "social_mode" : new_matching.social_mode,
-            "desired_gender" : new_matching.desired_gender,
-            "desired_major" : new_matching.desired_major,
-            "min_people" : new_matching.min_people,
-            "max_people" : new_matching.max_people,
-            "start_time" : new_matching.start_time.strftime("%Y-%m-%d %H:%M"),
-            "end_time" : new_matching.end_time.strftime("%Y-%m-%d %H:%M"),
-            "duration" : new_matching.duration
-        }
-
-        json_res = json.dumps(
-            {
-                "status": 200,
-                "success": True,
-                "message": "생성 성공",
-                "data": new_matching_json
-            },
-            ensure_ascii=False
-        )
+        if request.user.is_authenticated:
+            body = json.loads(request.body.decode('utf-8'))
+            cur_matzip = get_object_or_404(Matzip, pk=matzip_id)
             
-        return HttpResponse(
-            json_res,
-            content_type=u"application/json; charset=utf-8",
-            status=200
-        )
+            start = datetime.strptime(body['start_time'], "%Y-%m-%d %H:%M")
+            time_str = body['duration']
+            time_str = time_str.replace(" ", "")
+            time_str = time_str.rstrip('분')
+            list = time_str.split('시간')
+            sum = int(list[0])*60 + int(list[1])
+            end = start + timedelta(minutes=+sum)
+            
+            new_matching = Matching.objects.create(
+                leader = request.user.profile,
+                matzip = cur_matzip,
+                bio = body['bio'],
+                social_mode = body['social_mode'],
+                desired_gender = body['desired_gender'],
+                desired_major = body['desired_major'],
+                min_people = body['min_people'],
+                max_people = body['max_people'],
+                start_time = start,
+                end_time = end,
+                duration = body['duration']
+            )
+            
+            cur_matzip.waiting+=1
+            cur_matzip.save()
+
+            new_matching_json = {
+                "leader" : new_matching.leader.nickname,
+                "matzip" : new_matching.matzip.name,
+                "created_time" : new_matching.created_time.strftime("%Y-%m-%d %H:%M:%S"),
+                "is_matched" : new_matching.is_matched,
+                "is_closed" : new_matching.is_closed,
+                "bio" : new_matching.bio,
+                "social_mode" : new_matching.social_mode,
+                "desired_gender" : new_matching.desired_gender,
+                "desired_major" : new_matching.desired_major,
+                "min_people" : new_matching.min_people,
+                "max_people" : new_matching.max_people,
+                "start_time" : new_matching.start_time.strftime("%Y-%m-%d %H:%M"),
+                "end_time" : new_matching.end_time.strftime("%Y-%m-%d %H:%M"),
+                "duration" : new_matching.duration
+            }
+
+            json_res = json.dumps(
+                {
+                    "status": 200,
+                    "success": True,
+                    "message": "생성 성공",
+                    "data": new_matching_json
+                },
+                ensure_ascii=False
+            )
+                
+            return HttpResponse(
+                json_res,
+                content_type=u"application/json; charset=utf-8",
+                status=200
+            )
+        else:
+            return JsonResponse({
+            'status' : 401,
+            'success': False,
+            'message': '사용자인증실패',
+            'data': None
+            })
 
     else:
         return JsonResponse({
@@ -227,86 +239,38 @@ def read_update_delete_matching(request, matching_id):
 def join_cancel_matching(request, matching_id):
     # 팔로워가 매칭을 신청하는 코드
     if request.method == 'POST':
-        # body = json.loads(request.body.decode('utf-8'))
-        cur_matching = get_object_or_404(Matching, pk=matching_id)
-       
-        cur_user_profile = request.user.profile
-        
-        if(cur_matching.desired_gender == 'F' or cur_matching.desired_gender == 'M'):
-            if(cur_matching.desired_gender != cur_user_profile.gender):
-                return JsonResponse({
-                    'status': 400,
-                    'success': False,
-                    'message': '성별조건불일치',
-                    'data': None
-                })
-        if(cur_matching.desired_major != '무관'):
-            if(cur_matching.desired_major != cur_user_profile.major):
-                return JsonResponse({
-                    'status': 400,
-                    'success': False,
-                    'message': '전공조건불일치',
-                    'data': None
-                })
-       
-       
-        new_follower = Follower.objects.create(
-            matching = cur_matching,
-            profile = request.user.profile,
-        )
+        if request.user.is_authenticated:
+            # body = json.loads(request.body.decode('utf-8'))
+            cur_matching = get_object_or_404(Matching, pk=matching_id)
 
-
-        follower_all = Follower.objects.filter(matching = cur_matching)
-
-        if cur_matching.min_people <= len(follower_all):
-            cur_matching.is_matched = True
-        else:
-            cur_matching.is_matched = False
+            cur_user_profile = request.user.profile
             
-        if cur_matching.max_people <= len(follower_all):
-            cur_matching.is_closed = True
-        else:
-            cur_matching.is_closed = False
+            if(cur_matching.desired_gender == 'F' or cur_matching.desired_gender == 'M'):
+                if(cur_matching.desired_gender != cur_user_profile.gender):
+                    return JsonResponse({
+                        'status': 400,
+                        'success': False,
+                        'message': '성별조건불일치',
+                        'data': None
+                    })
+            if(cur_matching.desired_major != '무관'):
+                if(cur_matching.desired_major != cur_user_profile.major):
+                    return JsonResponse({
+                        'status': 400,
+                        'success': False,
+                        'message': '전공조건불일치',
+                        'data': None
+                    })
         
-        cur_matching.save()
-
-        new_follower_json = {
-            "matching_id" : matching_id,
-            "nickname" : new_follower.profile.nickname,
-            "gender" : new_follower.profile.gender,
-            "major" : new_follower.profile.major
-        }
-
-        json_res = json.dumps(
-            {
-                "status": 200,
-                "success": True,
-                "message": "매칭 신청 성공",
-                "data": new_follower_json
-            },
-            ensure_ascii=False
-        )
-            
-        return HttpResponse(
-            json_res,
-            content_type=u"application/json; charset=utf-8",
-            status=200
-        )
-
-    
-    # 팔로워가 매칭을 취소하는 코드
-    elif request.method == 'DELETE':
-        cur_matching = get_object_or_404(Matching, pk=matching_id)
-        cur_follower = get_object_or_404(Follower, profile=request.user.profile, matching = cur_matching)
-
-        time_now = datetime.now() 
-        time_limit = cur_matching.start_time + timedelta(hours=-1)
         
+            new_follower = Follower.objects.create(
+                matching = cur_matching,
+                profile = request.user.profile,
+            )
 
-        if time_now < time_limit:
-            cur_follower.delete()           
-            
+
             follower_all = Follower.objects.filter(matching = cur_matching)
+
             if cur_matching.min_people <= len(follower_all):
                 cur_matching.is_matched = True
             else:
@@ -316,33 +280,97 @@ def join_cancel_matching(request, matching_id):
                 cur_matching.is_closed = True
             else:
                 cur_matching.is_closed = False
-
+            
             cur_matching.save()
 
-            cur_profile = get_object_or_404(Profile, account = request.user)
-            cur_profile.cancel+=1
-            cur_profile.save()
-            
+            new_follower_json = {
+                "matching_id" : matching_id,
+                "nickname" : new_follower.profile.nickname,
+                "gender" : new_follower.profile.gender,
+                "major" : new_follower.profile.major
+            }
+
             json_res = json.dumps(
                 {
                     "status": 200,
                     "success": True,
-                    "message": "삭제 성공",
-                    "data": None
+                    "message": "매칭 신청 성공",
+                    "data": new_follower_json
                 },
                 ensure_ascii=False
             )
-            
+                
             return HttpResponse(
                 json_res,
                 content_type=u"application/json; charset=utf-8",
                 status=200
             )
-            
         else:
             return JsonResponse({
-                'status': 400,
-                'success': False,
-                'message': '매칭 취소 시간 지남',
-                'data': None
+            'status' : 401,
+            'success': False,
+            'message': '사용자인증실패',
+            'data': None
+            })
+
+    
+    # 팔로워가 매칭을 취소하는 코드
+    elif request.method == 'DELETE':
+        if request.user.is_authenticated:
+            cur_matching = get_object_or_404(Matching, pk=matching_id)
+            cur_follower = get_object_or_404(Follower, profile=request.user.profile, matching = cur_matching)
+
+            time_now = datetime.now() 
+            time_limit = cur_matching.start_time + timedelta(hours=-1)
+            
+
+            if time_now < time_limit:
+                cur_follower.delete()           
+                
+                follower_all = Follower.objects.filter(matching = cur_matching)
+                if cur_matching.min_people <= len(follower_all):
+                    cur_matching.is_matched = True
+                else:
+                    cur_matching.is_matched = False
+                    
+                if cur_matching.max_people <= len(follower_all):
+                    cur_matching.is_closed = True
+                else:
+                    cur_matching.is_closed = False
+
+                cur_matching.save()
+
+                cur_profile = get_object_or_404(Profile, account = request.user)
+                cur_profile.cancel+=1
+                cur_profile.save()
+                
+                json_res = json.dumps(
+                    {
+                        "status": 200,
+                        "success": True,
+                        "message": "삭제 성공",
+                        "data": None
+                    },
+                    ensure_ascii=False
+                )
+                
+                return HttpResponse(
+                    json_res,
+                    content_type=u"application/json; charset=utf-8",
+                    status=200
+                )
+                
+            else:
+                return JsonResponse({
+                    'status': 400,
+                    'success': False,
+                    'message': '매칭 취소 시간 지남',
+                    'data': None
+                })
+        else:
+            return JsonResponse({
+            'status' : 401,
+            'success': False,
+            'message': '사용자인증실패',
+            'data': None
             })
