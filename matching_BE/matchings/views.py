@@ -75,7 +75,7 @@ def create_matching(request, matzip_id):
                 {
                     "status": 401,
                     "success": False,
-                    "message": "사용자인증없음",
+                    "message": "사용자인증실패",
                     "data": None
                 },
                 ensure_ascii=False
@@ -341,7 +341,7 @@ def join_cancel_matching(request, matching_id):
                 {
                     "status": 401,
                     "success": False,
-                    "message": "사용자인증없음",
+                    "message": "사용자인증실패",
                     "data": None
                 },
                 ensure_ascii=False
@@ -413,7 +413,7 @@ def join_cancel_matching(request, matching_id):
                 {
                     "status": 401,
                     "success": False,
-                    "message": "사용자인증없음",
+                    "message": "사용자인증실패",
                     "data": None
                 },
                 ensure_ascii=False
