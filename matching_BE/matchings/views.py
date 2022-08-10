@@ -71,17 +71,38 @@ def create_matching(request, matzip_id):
                 status=200
             )
         else:
-            return JsonResponse({
-            'status' : 401,
-            'success': False,
-            'message': '사용자인증실패',
-            'data': None
-            })
+            json_res = json.dumps(
+                {
+                    "status": 401,
+                    "success": False,
+                    "message": "사용자인증없음",
+                    "data": None
+                },
+                ensure_ascii=False
+            )
+                
+            return HttpResponse(
+                json_res,
+                content_type=u"application/json; charset=utf-8",
+                status=401
+            )
 
     else:
-        return JsonResponse({
-            "status" : 405
-        })
+        json_res = json.dumps(
+                {
+                    "status": 405,
+                    "success": False,
+                    "message": "method error",
+                    "data": None
+                },
+                ensure_ascii=False
+            )
+                
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=405
+        )
         
 
 @require_http_methods(['GET','PATCH','DELETE'])
@@ -226,14 +247,23 @@ def read_update_delete_matching(request, matching_id):
             status=200
         )
     
-    
     else:
-        return JsonResponse({
-                'status': 405,
-                'success': False,
-                'message': 'Method Error',
-                'data': None
-            })
+        json_res = json.dumps(
+                {
+                    "status": 405,
+                    "success": False,
+                    "message": "method error",
+                    "data": None
+                },
+                ensure_ascii=False
+            )
+                
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=405
+        )
+
 
 @require_http_methods(['POST','DELETE'])
 def join_cancel_matching(request, matching_id):
@@ -305,13 +335,23 @@ def join_cancel_matching(request, matching_id):
                 content_type=u"application/json; charset=utf-8",
                 status=200
             )
+
         else:
-            return JsonResponse({
-            'status' : 401,
-            'success': False,
-            'message': '사용자인증실패',
-            'data': None
-            })
+            json_res = json.dumps(
+                {
+                    "status": 401,
+                    "success": False,
+                    "message": "사용자인증없음",
+                    "data": None
+                },
+                ensure_ascii=False
+            )
+                
+            return HttpResponse(
+                json_res,
+                content_type=u"application/json; charset=utf-8",
+                status=401
+            )
 
     
     # 팔로워가 매칭을 취소하는 코드
@@ -367,10 +407,37 @@ def join_cancel_matching(request, matching_id):
                     'message': '매칭 취소 시간 지남',
                     'data': None
                 })
+
         else:
-            return JsonResponse({
-            'status' : 401,
-            'success': False,
-            'message': '사용자인증실패',
-            'data': None
-            })
+            json_res = json.dumps(
+                {
+                    "status": 401,
+                    "success": False,
+                    "message": "사용자인증없음",
+                    "data": None
+                },
+                ensure_ascii=False
+            )
+                
+            return HttpResponse(
+                json_res,
+                content_type=u"application/json; charset=utf-8",
+                status=401
+            )
+
+    else:
+        json_res = json.dumps(
+                {
+                    "status": 405,
+                    "success": False,
+                    "message": "method error",
+                    "data": None
+                },
+                ensure_ascii=False
+            )
+                
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=405
+        )
