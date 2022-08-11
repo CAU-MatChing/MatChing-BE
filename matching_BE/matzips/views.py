@@ -8,36 +8,70 @@ import json
 @require_http_methods(['POST','GET'])
 def create_getall_matzip(request):
     if request.method == 'POST':
-        body = json.loads(request.body.decode('utf-8'))
-        
-        new_matzip = Matzip.objects.create(
-            name = body['name'],
-            location = body['location'],
-            waiting = 0
-        )
-        
-        new_matzip_json = {
-            "name" : new_matzip.name,
-            "location" : new_matzip.location,
-            "waiting" : new_matzip.waiting
-        }
-
-        json_res = json.dumps(
-            {
-                "status": 200,
-                "success": True,
-                "message": "생성 성공",
-                "data": new_matzip_json
-            },
-            ensure_ascii=False
-        )
+        if request.user.is_authenticated:
+            body = json.loads(request.body.decode('utf-8'))
             
-        return HttpResponse(
-            json_res,
-            content_type=u"application/json; charset=utf-8",
-            status=200
-        )
+            if Matzip.objects.filter(name = body['name']).exists():
+                json_res = json.dumps(
+                        {
+                            "status": 400,
+                            "success": False,
+                            "message": "이미 존재하는 식당",
+                            "data": None
+                        },
+                        ensure_ascii=False
+                    )
 
+                return HttpResponse(
+                    json_res,
+                    content_type=u"application/json; charset=utf-8",
+                    status=400
+                )
+
+            new_matzip = Matzip.objects.create(
+                name = body['name'],
+                location = body['location'],
+                waiting = 0
+            )
+            
+            new_matzip_json = {
+                "name" : new_matzip.name,
+                "location" : new_matzip.location,
+                "waiting" : new_matzip.waiting
+            }
+
+            json_res = json.dumps(
+                {
+                    "status": 200,
+                    "success": True,
+                    "message": "생성 성공",
+                    "data": new_matzip_json
+                },
+                ensure_ascii=False
+            )
+                
+            return HttpResponse(
+                json_res,
+                content_type=u"application/json; charset=utf-8",
+                status=200
+            )
+        
+        else:
+            json_res = json.dumps(
+                {
+                    "status": 401,
+                    "success": False,
+                    "message": "사용자인증실패",
+                    "data": None
+                },
+                ensure_ascii=False
+            )
+                
+            return HttpResponse(
+                json_res,
+                content_type=u"application/json; charset=utf-8",
+                status=401
+            )
 
     elif request.method == 'GET':
         matzip_all = Matzip.objects.all()
@@ -68,35 +102,25 @@ def create_getall_matzip(request):
         )
 
     else:
-        return JsonResponse({
-                'status': 405,
-                'success': False,
-                'message': 'Method Error',
-                'data': None
-            })
-            
-def delete_matzip(request, id):
-    if request.method =="DELETE":
-        delete_matzip = get_object_or_404(Matzip, pk=id)
-        delete_matzip.delete()
+        json_res = json.dumps(
+                {
+                    "status": 405,
+                    "success": False,
+                    "message": "method error",
+                    "data": None
+                },
+                ensure_ascii=False
+            )
+                
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=405
+        )
 
-        return JsonResponse({
-                'status': 200,
-                'success': True,
-                'message': 'Delete 성공!',
-                'data': None
-            })
-    else:
-        return JsonResponse({
-                'status': 405,
-                'success': False,
-                'message': 'Delete error',
-                'data': None
-            })
-        
 
-        
-def get_matzip(request, id):
+@require_http_methods(['DELETE','PATCH','GET'])  
+def get_update_delete_matzip(request, id):
     if request.method == "GET":
         get_matzip = get_object_or_404(Matzip, pk=id)
         
@@ -106,19 +130,23 @@ def get_matzip(request, id):
             "waiting" : get_matzip.waiting
         }
         
-        return JsonResponse({
-            "data" : get_matzip_json
-        })
-    else:
-        return JsonResponse({
-                'status': 405,
-                'success': False,
-                'message': 'Get error',
-                'data': None
-            })
-        
-def update_matzip(request, id):
-    if request.method == "PATCH":
+        json_res = json.dumps(
+            {
+                "status": 200,
+                "success": True,
+                "message": "맛집 단일 조회 성공",
+                "data": get_matzip_json
+            },
+            ensure_ascii=False
+        )
+            
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=200
+        )
+
+    elif request.method == "PATCH":
         body = json.loads(request.body.decode('utf-8'))
         update_matzip = get_object_or_404(Matzip, pk=id)
         
@@ -133,17 +161,60 @@ def update_matzip(request, id):
             "waiting" : update_matzip.waiting
         }
         
-        return JsonResponse({
-            "data" : update_matzip_json
-        })
+        json_res = json.dumps(
+            {
+                "status": 200,
+                "success": True,
+                "message": "맛집 수정 성공",
+                "data": update_matzip_json
+            },
+            ensure_ascii=False
+        )
+            
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=200
+        )
+
+    elif request.method =="DELETE":
+        delete_matzip = get_object_or_404(Matzip, pk=id)
+        delete_matzip.delete()
+
+        json_res = json.dumps(
+            {
+                "status": 200,
+                "success": True,
+                "message": "맛집 삭제 성공",
+                "data": None
+            },
+            ensure_ascii=False
+        )
+            
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=200
+        )
+    
     else:
-        return JsonResponse({
-                'status': 405,
-                'success': False,
-                'message': 'Get error',
-                'data': None
-            })
-        
+        json_res = json.dumps(
+                {
+                    "status": 405,
+                    "success": False,
+                    "message": "method error",
+                    "data": None
+                },
+                ensure_ascii=False
+            )
+                
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=405
+        )
+
+@require_http_methods(['GET'])  
 def getall_now_matzip(request):
     if request.method == "GET":
         now_matzip_all = Matzip.objects.all()
@@ -189,13 +260,35 @@ def getall_now_matzip(request):
             }
             now_matzip_json_all.append(now_matzip_json)
         
-        return JsonResponse({
-            "data" : now_matzip_json_all
-        })
+        json_res = json.dumps(
+                {
+                    "status": 200,
+                    "success": True,
+                    "message": "맛집별 매칭 전체 조회 성공",
+                    "data": now_matzip_json_all
+                },
+                ensure_ascii=False
+            )
+                
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=200
+        )
+
     else:
-        return JsonResponse({
-                'status': 405,
-                'success': False,
-                'message': 'Get error',
-                'data': None
-            })
+        json_res = json.dumps(
+                {
+                    "status": 405,
+                    "success": False,
+                    "message": "method error",
+                    "data": None
+                },
+                ensure_ascii=False
+            )
+                
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=405
+        )
