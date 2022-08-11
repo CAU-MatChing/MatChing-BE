@@ -7,6 +7,7 @@ from matzips.models import Matzip
 from datetime import datetime, timedelta
 import json
 
+@require_http_methods(['POST'])
 def create_matching(request, matzip_id):
     if request.method == 'POST':
         if request.user.is_authenticated:
@@ -275,22 +276,79 @@ def join_cancel_matching(request, matching_id):
 
             cur_user_profile = request.user.profile
             
+            # 리더가 자신이 생성한 매칭을 신청한 경우 검사
+            if cur_matching.leader == cur_user_profile:
+                json_res = json.dumps(
+                        {
+                            "status": 400,
+                            "success": False,
+                            "message": "리더와 팔로워가 동일함",
+                            "data": None
+                        },
+                        ensure_ascii=False
+                    )
+
+                return HttpResponse(
+                    json_res,
+                    content_type=u"application/json; charset=utf-8",
+                    status=400
+                )
+
+            # 이미 신청한 매칭을 중복 신청한 경우 검사
+            if Follower.objects.filter(matching = cur_matching,profile=cur_user_profile).exists():
+                json_res = json.dumps(
+                        {
+                            "status": 400,
+                            "success": False,
+                            "message": "이미 신청한 매칭",
+                            "data": None
+                        },
+                        ensure_ascii=False
+                    )
+
+                return HttpResponse(
+                    json_res,
+                    content_type=u"application/json; charset=utf-8",
+                    status=400
+                )
+
+            # 리더가 설정한 성별 조건에 맞는지 검사
             if(cur_matching.desired_gender == 'F' or cur_matching.desired_gender == 'M'):
                 if(cur_matching.desired_gender != cur_user_profile.gender):
-                    return JsonResponse({
-                        'status': 400,
-                        'success': False,
-                        'message': '성별조건불일치',
-                        'data': None
-                    })
+                    json_res = json.dumps(
+                        {
+                            "status": 400,
+                            "success": False,
+                            "message": "성별조건불일치",
+                            "data": None
+                        },
+                        ensure_ascii=False
+                    )
+
+                    return HttpResponse(
+                        json_res,
+                        content_type=u"application/json; charset=utf-8",
+                        status=400
+                    )
+            
+            # 리더가 설정한 전공 조건에 맞는지 검사
             if(cur_matching.desired_major != '무관'):
                 if(cur_matching.desired_major != cur_user_profile.major):
-                    return JsonResponse({
-                        'status': 400,
-                        'success': False,
-                        'message': '전공조건불일치',
-                        'data': None
-                    })
+                    json_res = json.dumps(
+                        {
+                            "status": 400,
+                            "success": False,
+                            "message": "전공조건불일치",
+                            "data": None
+                        },
+                        ensure_ascii=False
+                    )
+
+                    return HttpResponse(
+                        json_res,
+                        content_type=u"application/json; charset=utf-8",
+                        status=400
+                    )
         
         
             new_follower = Follower.objects.create(
@@ -401,12 +459,21 @@ def join_cancel_matching(request, matching_id):
                 )
                 
             else:
-                return JsonResponse({
-                    'status': 400,
-                    'success': False,
-                    'message': '매칭 취소 시간 지남',
-                    'data': None
-                })
+                json_res = json.dumps(
+                    {
+                        "status": 400,
+                        "success": True,
+                        "message": "매칭취소시간지남",
+                        "data": None
+                    },
+                    ensure_ascii=False
+                )
+                
+                return HttpResponse(
+                    json_res,
+                    content_type=u"application/json; charset=utf-8",
+                    status=400
+                )
 
         else:
             json_res = json.dumps(
