@@ -1,10 +1,13 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse, HttpResponse
+from django.views.decorators.http import require_http_methods
 from .models import *
 from matchings.models import *
 import json
+from datetime import date
 
 # Create your views here.
+@require_http_methods(['POST'])  
 def create_profile(request):
     if request.method == 'POST':
         if request.user.is_authenticated:
@@ -23,7 +26,7 @@ def create_profile(request):
                 matching_num = 0,
                 matching_people = 0,
                 is_disabled = False,
-                release_date = '2022-7-28'
+                release_date = date.today()
             )
 
             new_profile_json = {
@@ -34,49 +37,99 @@ def create_profile(request):
                 "bio" : new_profile.bio
             }
 
-            return JsonResponse({
-                "status":200,
-                "message" : "프로필 생성 성공",
-                "data" : new_profile_json
-            })
+            json_res = json.dumps(
+            {
+                "status": 200,
+                "success": True,
+                "message": "생성 성공",
+                "data": new_profile_json
+            },
+            ensure_ascii=False
+            )
+                
+            return HttpResponse(
+                json_res,
+                content_type=u"application/json; charset=utf-8",
+                status=200
+            )
+
         else:
-            return JsonResponse({
-            'status' : 401,
-            'success': False,
-            'message': '사용자인증실패',
-            'data': None
-            })
+            json_res = json.dumps(
+                    {
+                        "status": 401,
+                        "success": False,
+                        "message": "사용자인증실패",
+                        "data": None
+                    },
+                    ensure_ascii=False
+                )
+                    
+            return HttpResponse(
+                json_res,
+                content_type=u"application/json; charset=utf-8",
+                status=401
+            )
 
     else:
-        return JsonResponse({
-            "status" : 405
-        })
+        json_res = json.dumps(
+                {
+                    "status": 405,
+                    "success": False,
+                    "message": "method error",
+                    "data": None
+                },
+                ensure_ascii=False
+            )
+                
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=405
+        )
 
-
+@require_http_methods(['DELETE'])  
 def delete_profile(requests, account_id):
     if requests.method =="DELETE":
         delete_profile = get_object_or_404(Profile, pk=id)
         # 특정 profile Delete
         delete_profile.delete()
 
-        return JsonResponse({
-                'status': 200,
-                'success': True,
-                'message': 'Delete 성공!',
-                'data': None
-            })
+        json_res = json.dumps(
+            {
+                "status": 200,
+                "success": True,
+                "message": "프로필 삭제 성공",
+                "data": None
+            },
+            ensure_ascii=False
+            )
+                
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=200
+        )
     else:
-        return JsonResponse({
-                'status': 405,
-                'success': False,
-                'message': 'Delete error',
-                'data': None
-            })
-        
+        json_res = json.dumps(
+                {
+                    "status": 405,
+                    "success": False,
+                    "message": "method error",
+                    "data": None
+                },
+                ensure_ascii=False
+            )
+                
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=405
+        )
+
+@require_http_methods(['GET'])  
 def get_my_matchings(request):
     if request.method == 'GET':
         if request.user.is_authenticated:
-           
             my_profile = request.user.profile
             matching_json_all=[]
             
@@ -161,14 +214,35 @@ def get_my_matchings(request):
                 
         
         else:
-            return JsonResponse({
-                'status' : 401,
-                'success': False,
-                'message': '사용자인증실패',
-                'data': None
-            })
+            json_res = json.dumps(
+                    {
+                        "status": 401,
+                        "success": False,
+                        "message": "사용자인증실패",
+                        "data": None
+                    },
+                    ensure_ascii=False
+                )
+                    
+            return HttpResponse(
+                json_res,
+                content_type=u"application/json; charset=utf-8",
+                status=401
+            )
 
     else:
-        return JsonResponse({
-            "status" : 405
-        })
+        json_res = json.dumps(
+                {
+                    "status": 405,
+                    "success": False,
+                    "message": "method error",
+                    "data": None
+                },
+                ensure_ascii=False
+            )
+                
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=405
+        )
