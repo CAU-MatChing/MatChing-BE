@@ -10,34 +10,35 @@ from datetime import date
 @require_http_methods(['POST'])  
 def create_profile(request):
     if request.method == 'POST':
-        if request.user.is_authenticated:
-            body = json.loads(request.body.decode('utf-8'))
-        
-            new_profile = Profile.objects.create(   
-                account = request.user,
-                nickname = body['nickname'],
-                major = body['major'],
-                gender = body['gender'],
-                bio = body['bio'],
-                
-                rudeness = 0,
-                noshow = 0,
-                cancel = 0,
-                matching_num = 0,
-                matching_people = 0,
-                is_disabled = False,
-                release_date = date.today()
-            )
+        #if request.user.is_authenticated:
+        body = json.loads(request.body.decode('utf-8'))
+            
+        new_profile = Profile.objects.create(   
+            #account = request.user,
+            account = get_object_or_404(Account, pk=body['account_id']),
+            nickname = body['nickname'],
+            major = body['major'],
+            gender = body['gender'],
+            bio = body['bio'],
+                    
+            rudeness = 0,
+            noshow = 0,
+            cancel = 0,
+            matching_num = 0,
+            matching_people = 0,
+            is_disabled = False,
+            release_date = date.today()
+        )
 
-            new_profile_json = {
-                "account" : new_profile.account.email,
-                "nickname" : new_profile.nickname,
-                "major" : new_profile.major,
-                "gender" : new_profile.gender,
-                "bio" : new_profile.bio
-            }
+        new_profile_json = {
+            "account" : new_profile.account.email,
+            "nickname" : new_profile.nickname,
+            "major" : new_profile.major,
+            "gender" : new_profile.gender,
+            "bio" : new_profile.bio
+        }
 
-            json_res = json.dumps(
+        json_res = json.dumps(
             {
                 "status": 200,
                 "success": True,
@@ -45,30 +46,14 @@ def create_profile(request):
                 "data": new_profile_json
             },
             ensure_ascii=False
-            )
-                
-            return HttpResponse(
-                json_res,
-                content_type=u"application/json; charset=utf-8",
-                status=200
-            )
-
-        else:
-            json_res = json.dumps(
-                    {
-                        "status": 401,
-                        "success": False,
-                        "message": "사용자인증실패",
-                        "data": None
-                    },
-                    ensure_ascii=False
-                )
+        )
                     
-            return HttpResponse(
-                json_res,
-                content_type=u"application/json; charset=utf-8",
-                status=401
-            )
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=200
+        )
+
 
     else:
         json_res = json.dumps(
@@ -245,4 +230,30 @@ def get_my_matchings(request):
             json_res,
             content_type=u"application/json; charset=utf-8",
             status=405
+        )
+        
+@require_http_methods(['GET'])  
+def get_nicknames(request):
+    if request.method == 'GET':
+        #리스트로 닉네임 넣어서 보내기
+        profile_all = Profile.objects.all()
+        nickname_json_all = []
+        
+        for profile in profile_all:
+            nickname_json_all.append(profile.nickname)
+        
+        json_res = json.dumps(
+                {
+                    #"status": 200,
+                    "success": True,
+                    #"message": "조회 성공",
+                    "nickname_list": nickname_json_all
+                },
+                ensure_ascii=False
+            )
+                
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=200
         )

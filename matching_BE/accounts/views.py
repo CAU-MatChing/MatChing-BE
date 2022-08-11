@@ -13,6 +13,7 @@ from django.views                    import View
 from django.http                     import JsonResponse,HttpResponse
 from django.core.exceptions          import ValidationError
 from django.core.validators          import validate_email
+from django.db                       import IntegrityError
 from django.contrib.sites.shortcuts  import get_current_site
 from django.shortcuts                import render, redirect
 from django.utils.encoding           import force_bytes, force_str
@@ -25,8 +26,8 @@ from email.mime.text import MIMEText
 
 # Create your views here.
 
-class SignUp(View):
-    def post(self, request):
+def sign_up(request) :
+    if request.method == 'POST':
         body = json.loads(request.body.decode('utf-8'))
         try:
             # 이메일 유효성을 검사(메세지를 받을 수 있는 이메일인가?)
@@ -67,6 +68,8 @@ class SignUp(View):
             
             return JsonResponse({"message" : "SUCCESS"}, status=200)
        
+        except IntegrityError:
+            return JsonResponse({"message" : "Error"}, status=400)
         except KeyError:
             return JsonResponse({"message" : "INVALID_KEY"}, status=400)
         except TypeError:
@@ -74,8 +77,8 @@ class SignUp(View):
         except ValidationError:
             return JsonResponse({"message" : "VALIDATION_ERROR"}, status=400)
         
-class Activate(View):
-    def get(self, request, uidb64, token):
+def activate(request, uidb64, token) :
+    if request.method == 'GET':
         try:
             uid  = force_str(urlsafe_base64_decode(uidb64))
             user = Account.objects.get(pk=uid)
@@ -106,62 +109,46 @@ def login(request) :
             auth_login(request,user)
             
             cur_user = request.user
-            if Profile.objects.filter(account = cur_user).exists():
-                if cur_user.profile.is_disabled == True:
-                    if cur_user.profile.release_date > date.today():
-                        auth_logout(request)
             
-                        json_res = json.dumps(
-                            {
-                                "status": 400,
-                                "success": True,
-                                "message": "정지 회원",
-                                "data": None
-                            },
-                            ensure_ascii=False
-                        )
-                        
-                        return HttpResponse(
-                            json_res,
-                            content_type=u"application/json; charset=utf-8",
-                            status=400
-                        )
+            if cur_user.profile.is_disabled == True:
+                if cur_user.profile.release_date > date.today():
+                    auth_logout(request)
+        
+                    json_res = json.dumps(
+                        {
+                            "status": 400,
+                            "success": True,
+                            "message": "정지 회원",
+                            "data": None
+                        },
+                        ensure_ascii=False
+                    )
                     
-                    else:
-                        cur_user.profile.is_disabled = False
-                        cur_user.profile.save()
-
-                json_res = json.dumps(
-                    {
-                        "status": 200,
-                        "success": True,
-                        "message": "로그인 성공",
-                        "data": None
-                    },
-                    ensure_ascii=False
-                )
+                    return HttpResponse(
+                        json_res,
+                        content_type=u"application/json; charset=utf-8",
+                        status=400
+                    )
                 
-                return HttpResponse(
-                    json_res,
-                    content_type=u"application/json; charset=utf-8",
-                    status=200
-                )
-            else:
-                json_res = json.dumps(
-                    {
-                        "status": 301,
-                        "success": False,
-                        "message": "프로필 생성 필요",
-                        "data": None
-                    },
-                    ensure_ascii=False
-                )
-                    
-                return HttpResponse(
-                    json_res,
-                    content_type=u"application/json; charset=utf-8",
-                    status=301
-                )
+                else:
+                    cur_user.profile.is_disabled = False
+                    cur_user.profile.save()
+
+            json_res = json.dumps(
+                {
+                    "status": 200,
+                    "success": True,
+                    "message": "로그인 성공",
+                    "data": None
+                },
+                ensure_ascii=False
+            )
+            
+            return HttpResponse(
+                json_res,
+                content_type=u"application/json; charset=utf-8",
+                status=200
+            )
     
         else:
             json_res = json.dumps(
