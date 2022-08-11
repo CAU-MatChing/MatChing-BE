@@ -1,6 +1,7 @@
 from .models    import *
 from .tokens    import account_activation_token
 from .text  import message
+from profiles.models    import Profile
 from matching_BE.settings   import *
 
 
@@ -9,7 +10,7 @@ EMAIL_PORT = get_secret("EMAIL_PORT")
 
 import json
 from django.views                    import View
-from django.http                     import JsonResponse
+from django.http                     import JsonResponse,HttpResponse
 from django.core.exceptions          import ValidationError
 from django.core.validators          import validate_email
 from django.contrib.sites.shortcuts  import get_current_site
@@ -17,6 +18,8 @@ from django.shortcuts                import render, redirect
 from django.utils.encoding           import force_bytes, force_str
 from django.utils.http               import urlsafe_base64_encode,urlsafe_base64_decode
 from django.contrib.auth             import login as auth_login, logout as auth_logout,authenticate
+from django.views.decorators.http    import require_http_methods
+from datetime                        import date
 import smtplib
 from email.mime.text import MIMEText
 
@@ -37,7 +40,6 @@ class SignUp(View):
             
             # 디비에 저장
             user = Account.objects.create_user(email, password)
-            
             
             # 이메일 보내기
             current_site = get_current_site(request) 
@@ -63,9 +65,7 @@ class SignUp(View):
             s.login(sendEmail , password) #로그인
             s.sendmail(sendEmail, recvEmail, msg.as_string()) #메일 전송, 문자열로 변환하여 보냅니다.
             
-            
             return JsonResponse({"message" : "SUCCESS"}, status=200)
-       
        
         except KeyError:
             return JsonResponse({"message" : "INVALID_KEY"}, status=400)
@@ -104,19 +104,154 @@ def login(request) :
 
         if user is not None:
             auth_login(request,user)
-            return JsonResponse({
-                "status" : 200
-            })
+            
+            cur_user = request.user
+            if Profile.objects.filter(account = cur_user).exists():
+                if cur_user.profile.is_disabled == True:
+                    if cur_user.profile.release_date > date.today():
+                        auth_logout(request)
+            
+                        json_res = json.dumps(
+                            {
+                                "status": 400,
+                                "success": True,
+                                "message": "정지 회원",
+                                "data": None
+                            },
+                            ensure_ascii=False
+                        )
+                        
+                        return HttpResponse(
+                            json_res,
+                            content_type=u"application/json; charset=utf-8",
+                            status=400
+                        )
+                    
+                    else:
+                        cur_user.profile.is_disabled = False
+                        cur_user.profile.save()
+
+                json_res = json.dumps(
+                    {
+                        "status": 200,
+                        "success": True,
+                        "message": "로그인 성공",
+                        "data": None
+                    },
+                    ensure_ascii=False
+                )
+                
+                return HttpResponse(
+                    json_res,
+                    content_type=u"application/json; charset=utf-8",
+                    status=200
+                )
+            else:
+                json_res = json.dumps(
+                    {
+                        "status": 301,
+                        "success": False,
+                        "message": "프로필 생성 필요",
+                        "data": None
+                    },
+                    ensure_ascii=False
+                )
+                    
+                return HttpResponse(
+                    json_res,
+                    content_type=u"application/json; charset=utf-8",
+                    status=301
+                )
+    
         else:
-            return JsonResponse({
-                "status" : 400,
-                "message" : "로그인 실패"
-            })
+            json_res = json.dumps(
+                {
+                    "status": 400,
+                    "success": False,
+                    "message": "로그인 실패",
+                    "data": None
+                },
+                ensure_ascii=False
+            )
+                
+            return HttpResponse(
+                json_res,
+                content_type=u"application/json; charset=utf-8",
+                status=400
+            )
 
 def logout(request):
-    auth_logout(request)
+    if request.user.is_authenticated:
+        auth_logout(request)
+        
+        json_res = json.dumps(
+            {
+                "status": 200,
+                "success": True,
+                "message": "로그아웃 성공",
+                "data": None
+            },
+            ensure_ascii=False
+        )
+        
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=200
+        )
+
+    else:
+        json_res = json.dumps(
+            {
+                "status": 401,
+                "success": False,
+                "message": "사용자인증실패",
+                "data": None
+            },
+            ensure_ascii=False
+        )
+            
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=401
+        )
+
+@require_http_methods(['POST'])
+def delete_account(request):
+    if request.user.is_authenticated:
+        request.user.delete()
+        auth_logout(request)
+        
+        json_res = json.dumps(
+                {
+                    "status": 200,
+                    "success": True,
+                    "message": "회원탈퇴성공",
+                    "data": None
+                },
+                ensure_ascii=False
+            )
+            
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=200
+        )
     
-    return JsonResponse({
-        "status" : 200,
-        "message" : "로그아웃!"
-    })
+    else:
+        json_res = json.dumps(
+            {
+                "status": 401,
+                "success": False,
+                "message": "사용자인증실패",
+                "data": None
+            },
+            ensure_ascii=False
+        )
+            
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=401
+        )
