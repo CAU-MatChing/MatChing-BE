@@ -56,28 +56,18 @@ def create_matching(request, matzip_id):
                 "duration" : new_matching.duration
             }
 
-            json_res = json.dumps(
-                {
-                    "status": 200,
-                    "success": True,
-                    "message": "생성 성공",
-                    "data": new_matching_json
-                },
-                ensure_ascii=False
-            )
+            
                 
             return HttpResponse(
-                json_res,
+                json.dumps(new_matching_json, ensure_ascii=False),
                 content_type=u"application/json; charset=utf-8",
                 status=200
             )
         else:
             json_res = json.dumps(
                 {
-                    "status": 401,
                     "success": False,
                     "message": "사용자인증실패",
-                    "data": None
                 },
                 ensure_ascii=False
             )
@@ -87,26 +77,9 @@ def create_matching(request, matzip_id):
                 content_type=u"application/json; charset=utf-8",
                 status=401
             )
-
-    else:
-        json_res = json.dumps(
-                {
-                    "status": 405,
-                    "success": False,
-                    "message": "method error",
-                    "data": None
-                },
-                ensure_ascii=False
-            )
-                
-        return HttpResponse(
-            json_res,
-            content_type=u"application/json; charset=utf-8",
-            status=405
-        )
         
 
-@require_http_methods(['GET','PATCH','DELETE'])
+@require_http_methods(['GET','DELETE'])
 def read_update_delete_matching(request, matching_id):
     # 매칭 정보 하나를 불러오는 코드
     if request.method == 'GET':
@@ -142,86 +115,12 @@ def read_update_delete_matching(request, matching_id):
             "duration" : get_matching.duration,
 			"followers": follower_json_all 
         }
-        
-        json_res = json.dumps(
-            {
-                "status": 200,
-                "success": True,
-                "message": "조회 성공",
-                "data": get_matching_json
-            },
-            ensure_ascii=False
-        )
             
         return HttpResponse(
-            json_res,
+            json.dumps(get_matching_json, ensure_ascii=False),
             content_type=u"application/json; charset=utf-8",
             status=200
         )
-
-    # 아직 매칭되지 않았을 때 매칭 신청 정보를 수정하는 코드
-    elif request.method == "PATCH":
-        update_matching = get_object_or_404(Matching, pk=matching_id)
-        
-        if update_matching.is_matched == False:
-            body = json.loads(request.body.decode('utf-8'))
-            update_matching.bio = body['bio']
-            update_matching.social_mode = body['social_mode']
-            update_matching.desired_gender = body['desired_gender']
-            update_matching.desired_major = body['desired_major']
-            update_matching.min_people = body['min_people']
-            update_matching.max_people = body['max_people']
-            update_matching.start_time = body['start_time']
-            update_matching.end_time = body['end_time']
-
-            update_matching.save()
-
-            update_matching_json = {
-                "matching_id" : update_matching.id,
-                "matzip" : update_matching.matzip.name,
-                "bio" : update_matching.bio,
-                "leader" : update_matching.leader.nickname,
-                "social_mode" : update_matching.social_mode, # 프론트에서 문자열로 넘겨줄지, 프론트에서 문자열로 바꿀지
-                "desired_gender" : update_matching.desired_gender,
-                "desired_major" : update_matching.desired_major,
-                "min_people" : update_matching.min_people,
-                "max_people" : update_matching.max_people,
-                "start_time" : update_matching.start_time.strftime("%Y-%m-%d %H:%M"),
-                "end_time" : update_matching.end_time.strftime("%Y-%m-%d %H:%M"),
-            }
-
-            json_res = json.dumps(
-                {
-                    "status": 200,
-                    "success": True,
-                    "message": "수정 성공",
-                    "data": update_matching_json
-                },
-                ensure_ascii=False
-            )
-            
-            return HttpResponse(
-                json_res,
-                content_type=u"application/json; charset=utf-8",
-                status=200
-            )
-
-        else:
-            json_res = json.dumps(
-                {
-                    "status": 400,
-                    "success": False,
-                    "message": "매칭 수정 불가",
-                    "data": None
-                },
-                ensure_ascii=False
-            )
-
-            return HttpResponse(
-                json_res,
-                content_type=u"application/json; charset=utf-8",
-                status=200
-            )
 
 
     elif request.method =="DELETE":
@@ -234,10 +133,8 @@ def read_update_delete_matching(request, matching_id):
 
         json_res = json.dumps(
             {
-                "status": 200,
                 "success": True,
                 "message": "삭제 성공",
-                "data": None
             },
             ensure_ascii=False
         )
@@ -246,23 +143,6 @@ def read_update_delete_matching(request, matching_id):
             json_res,
             content_type=u"application/json; charset=utf-8",
             status=200
-        )
-    
-    else:
-        json_res = json.dumps(
-                {
-                    "status": 405,
-                    "success": False,
-                    "message": "method error",
-                    "data": None
-                },
-                ensure_ascii=False
-            )
-                
-        return HttpResponse(
-            json_res,
-            content_type=u"application/json; charset=utf-8",
-            status=405
         )
 
 
@@ -280,10 +160,8 @@ def join_cancel_matching(request, matching_id):
             if cur_matching.leader == cur_user_profile:
                 json_res = json.dumps(
                         {
-                            "status": 400,
                             "success": False,
                             "message": "리더와 팔로워가 동일함",
-                            "data": None
                         },
                         ensure_ascii=False
                     )
@@ -298,10 +176,8 @@ def join_cancel_matching(request, matching_id):
             if Follower.objects.filter(matching = cur_matching,profile=cur_user_profile).exists():
                 json_res = json.dumps(
                         {
-                            "status": 400,
                             "success": False,
-                            "message": "이미 신청한 매칭",
-                            "data": None
+                            "message": "매칭 중복 신청",
                         },
                         ensure_ascii=False
                     )
@@ -317,10 +193,8 @@ def join_cancel_matching(request, matching_id):
                 if(cur_matching.desired_gender != cur_user_profile.gender):
                     json_res = json.dumps(
                         {
-                            "status": 400,
                             "success": False,
                             "message": "성별조건불일치",
-                            "data": None
                         },
                         ensure_ascii=False
                     )
@@ -336,10 +210,8 @@ def join_cancel_matching(request, matching_id):
                 if(cur_matching.desired_major != cur_user_profile.major):
                     json_res = json.dumps(
                         {
-                            "status": 400,
                             "success": False,
                             "message": "전공조건불일치",
-                            "data": None
                         },
                         ensure_ascii=False
                     )
@@ -378,18 +250,8 @@ def join_cancel_matching(request, matching_id):
                 "major" : new_follower.profile.major
             }
 
-            json_res = json.dumps(
-                {
-                    "status": 200,
-                    "success": True,
-                    "message": "매칭 신청 성공",
-                    "data": new_follower_json
-                },
-                ensure_ascii=False
-            )
-                
             return HttpResponse(
-                json_res,
+                json.dumps(new_follower_json, ensure_ascii=False),
                 content_type=u"application/json; charset=utf-8",
                 status=200
             )
@@ -397,10 +259,8 @@ def join_cancel_matching(request, matching_id):
         else:
             json_res = json.dumps(
                 {
-                    "status": 401,
                     "success": False,
                     "message": "사용자인증실패",
-                    "data": None
                 },
                 ensure_ascii=False
             )
@@ -444,10 +304,8 @@ def join_cancel_matching(request, matching_id):
                 
                 json_res = json.dumps(
                     {
-                        "status": 200,
                         "success": True,
                         "message": "삭제 성공",
-                        "data": None
                     },
                     ensure_ascii=False
                 )
@@ -461,10 +319,8 @@ def join_cancel_matching(request, matching_id):
             else:
                 json_res = json.dumps(
                     {
-                        "status": 400,
                         "success": True,
                         "message": "매칭취소시간지남",
-                        "data": None
                     },
                     ensure_ascii=False
                 )
@@ -478,10 +334,8 @@ def join_cancel_matching(request, matching_id):
         else:
             json_res = json.dumps(
                 {
-                    "status": 401,
                     "success": False,
                     "message": "사용자인증실패",
-                    "data": None
                 },
                 ensure_ascii=False
             )
@@ -491,20 +345,3 @@ def join_cancel_matching(request, matching_id):
                 content_type=u"application/json; charset=utf-8",
                 status=401
             )
-
-    else:
-        json_res = json.dumps(
-                {
-                    "status": 405,
-                    "success": False,
-                    "message": "method error",
-                    "data": None
-                },
-                ensure_ascii=False
-            )
-                
-        return HttpResponse(
-            json_res,
-            content_type=u"application/json; charset=utf-8",
-            status=405
-        )

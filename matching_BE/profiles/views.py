@@ -40,10 +40,8 @@ def create_profile(request):
 
         json_res = json.dumps(
             {
-                "status": 200,
                 "success": True,
                 "message": "생성 성공",
-                "data": new_profile_json
             },
             ensure_ascii=False
         )
@@ -55,23 +53,6 @@ def create_profile(request):
         )
 
 
-    else:
-        json_res = json.dumps(
-                {
-                    "status": 405,
-                    "success": False,
-                    "message": "method error",
-                    "data": None
-                },
-                ensure_ascii=False
-            )
-                
-        return HttpResponse(
-            json_res,
-            content_type=u"application/json; charset=utf-8",
-            status=405
-        )
-
 @require_http_methods(['DELETE'])  
 def delete_profile(requests, account_id):
     if requests.method =="DELETE":
@@ -81,10 +62,8 @@ def delete_profile(requests, account_id):
 
         json_res = json.dumps(
             {
-                "status": 200,
                 "success": True,
                 "message": "프로필 삭제 성공",
-                "data": None
             },
             ensure_ascii=False
             )
@@ -94,22 +73,7 @@ def delete_profile(requests, account_id):
             content_type=u"application/json; charset=utf-8",
             status=200
         )
-    else:
-        json_res = json.dumps(
-                {
-                    "status": 405,
-                    "success": False,
-                    "message": "method error",
-                    "data": None
-                },
-                ensure_ascii=False
-            )
-                
-        return HttpResponse(
-            json_res,
-            content_type=u"application/json; charset=utf-8",
-            status=405
-        )
+
 
 @require_http_methods(['GET'])  
 def get_my_matchings(request):
@@ -181,18 +145,9 @@ def get_my_matchings(request):
                 matching_json_all.append(matching_json)
 
                 
-            json_res = json.dumps(
-                {
-                    "status": 200,
-                    "success": True,
-                    "message": "조회 성공",
-                    "data": matching_json_all
-                },
-                ensure_ascii=False
-            )
-                
+            
             return HttpResponse(
-                json_res,
+                json.dumps(matching_json_all, ensure_ascii=False),
                 content_type=u"application/json; charset=utf-8",
                 status=200
             )
@@ -201,10 +156,8 @@ def get_my_matchings(request):
         else:
             json_res = json.dumps(
                     {
-                        "status": 401,
                         "success": False,
                         "message": "사용자인증실패",
-                        "data": None
                     },
                     ensure_ascii=False
                 )
@@ -215,22 +168,6 @@ def get_my_matchings(request):
                 status=401
             )
 
-    else:
-        json_res = json.dumps(
-                {
-                    "status": 405,
-                    "success": False,
-                    "message": "method error",
-                    "data": None
-                },
-                ensure_ascii=False
-            )
-                
-        return HttpResponse(
-            json_res,
-            content_type=u"application/json; charset=utf-8",
-            status=405
-        )
         
 @require_http_methods(['GET'])  
 def get_nicknames(request):
@@ -244,9 +181,7 @@ def get_nicknames(request):
         
         json_res = json.dumps(
                 {
-                    #"status": 200,
                     "success": True,
-                    #"message": "조회 성공",
                     "nickname_list": nickname_json_all
                 },
                 ensure_ascii=False
