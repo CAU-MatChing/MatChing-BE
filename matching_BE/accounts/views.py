@@ -116,10 +116,8 @@ def login(request) :
         
                     json_res = json.dumps(
                         {
-                            "status": 400,
                             "success": True,
                             "message": "정지 회원",
-                            "data": None
                         },
                         ensure_ascii=False
                     )
@@ -136,10 +134,8 @@ def login(request) :
 
             json_res = json.dumps(
                 {
-                    "status": 200,
                     "success": True,
                     "message": "로그인 성공",
-                    "data": None
                 },
                 ensure_ascii=False
             )
@@ -153,10 +149,8 @@ def login(request) :
         else:
             json_res = json.dumps(
                 {
-                    "status": 400,
                     "success": False,
                     "message": "로그인 실패",
-                    "data": None
                 },
                 ensure_ascii=False
             )
@@ -173,10 +167,8 @@ def logout(request):
         
         json_res = json.dumps(
             {
-                "status": 200,
                 "success": True,
                 "message": "로그아웃 성공",
-                "data": None
             },
             ensure_ascii=False
         )
@@ -190,10 +182,8 @@ def logout(request):
     else:
         json_res = json.dumps(
             {
-                "status": 401,
                 "success": False,
                 "message": "사용자인증실패",
-                "data": None
             },
             ensure_ascii=False
         )
@@ -212,10 +202,8 @@ def delete_account(request):
         
         json_res = json.dumps(
                 {
-                    "status": 200,
                     "success": True,
                     "message": "회원탈퇴성공",
-                    "data": None
                 },
                 ensure_ascii=False
             )
@@ -229,12 +217,9 @@ def delete_account(request):
     else:
         json_res = json.dumps(
             {
-                "status": 401,
                 "success": False,
-                "message": "사용자인증실패",
-                "data": None
+                "message": "사용자인증 없음",
             },
-            ensure_ascii=False
         )
             
         return HttpResponse(
