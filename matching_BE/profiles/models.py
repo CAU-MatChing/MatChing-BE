@@ -7,7 +7,6 @@ class Profile(models.Model):
 	nickname = models.CharField(max_length=18, unique=True)
 	major = models.CharField(max_length=30)
 	gender = models.CharField(max_length=1)
-	bio = models.CharField(max_length=60, null=True, blank=True)
  
 	rudeness = models.IntegerField(default=0)
 	noshow = models.IntegerField(default=0)

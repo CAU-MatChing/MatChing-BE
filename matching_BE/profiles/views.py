@@ -19,7 +19,6 @@ def create_profile(request):
             nickname = body['nickname'],
             major = body['major'],
             gender = body['gender'],
-            bio = body['bio'],
                     
             rudeness = 0,
             noshow = 0,
@@ -30,13 +29,13 @@ def create_profile(request):
             release_date = date.today()
         )
 
-        new_profile_json = {
-            "account" : new_profile.account.email,
-            "nickname" : new_profile.nickname,
-            "major" : new_profile.major,
-            "gender" : new_profile.gender,
-            "bio" : new_profile.bio
-        }
+        # new_profile_json = {
+        #     "account" : new_profile.account.email,
+        #     "nickname" : new_profile.nickname,
+        #     "major" : new_profile.major,
+        #     "gender" : new_profile.gender,
+        #     "bio" : new_profile.bio
+        # }
 
         json_res = json.dumps(
             {
