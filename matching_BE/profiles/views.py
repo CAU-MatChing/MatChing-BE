@@ -29,18 +29,15 @@ def create_profile(request):
             release_date = date.today()
         )
 
-        # new_profile_json = {
-        #     "account" : new_profile.account.email,
-        #     "nickname" : new_profile.nickname,
-        #     "major" : new_profile.major,
-        #     "gender" : new_profile.gender,
-        #     "bio" : new_profile.bio
-        # }
-
         json_res = json.dumps(
             {
                 "success": True,
                 "message": "생성 성공",
+                "account" : new_profile.account.email,
+                "nickname" : new_profile.nickname,
+                "major" : new_profile.major,
+                "gender" : new_profile.gender,
+                "bio" : new_profile.bio
             },
             ensure_ascii=False
         )
