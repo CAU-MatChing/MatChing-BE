@@ -1,7 +1,7 @@
+from re import X
 from django.db import models
 from accounts.models import Account
 
-# Create your models here.
 class Profile(models.Model):
 	account = models.OneToOneField(Account, on_delete=models.CASCADE)
 	nickname = models.CharField(max_length=18, unique=True)
@@ -16,7 +16,10 @@ class Profile(models.Model):
 	is_disabled = models.BooleanField(default=False)
 	release_date = models.DateField()
  
- 
-	
-		
+class Report(models.Model):
+	type = models.IntegerField(default=0)
+	reporter = models.ForeignKey(Profile,related_name="reporter", on_delete=models.PROTECT)
+	target = models.ForeignKey(Profile, related_name="target",on_delete=models.PROTECT)
+	reason = models.TextField()
+
 		
