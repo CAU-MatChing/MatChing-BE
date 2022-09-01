@@ -4,7 +4,7 @@ from django.views.decorators.http import require_http_methods
 from .models import *
 from matchings.models import *
 import json
-from datetime import date
+from datetime import date,timedelta
 
 # Create your views here.
 @require_http_methods(['POST'])  
@@ -183,6 +183,54 @@ def get_nicknames(request):
                 ensure_ascii=False
             )
                 
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=200
+        )
+
+@require_http_methods(['POST'])
+def create_report(request):
+    if request.method == 'POST':
+        body = json.loads(request.body.decode('utf-8'))
+        target = Profile.objects.filter(nickname=body['target'])
+
+        if type == 1: #비매너
+            type = "rudeness"
+            target.rudeness+=1
+            # 80퍼센트 넘으면 3주 정지
+        elif type == 2: #노쇼
+            type = "no-show"
+            target.noshow+=1
+            # 노쇼 횟수 3회 이상이면 일정기간 정지
+            if (target.noshow//3)>=1 and (target.noshow%3)==0:
+                target.is_disabled = True
+                target.release_date = date.today()+timedelta(weeks=3)
+                target.save()
+            elif (target.noshow//3)>=3 and (target.noshow%3)==0:
+                target.is_disabled = True
+                target.release_date = date.today()+timedelta(weeks=2400)
+                target.save()
+        elif type == 3: #정보와 다른 사람
+            type="deception"
+            target.is_disabled = True
+            target.release_date = date.today()+timedelta(weeks=2400)
+            target.save()
+
+        new_report = Report.objects.create(   
+            reporter = request.user,
+            target = target,
+            reason = body['reason'],
+            type = body['type'],
+        )
+        json_res = json.dumps(
+            {
+                "success": True,
+                "message": "신고 접수 성공",
+            },
+            ensure_ascii=False
+        )
+                    
         return HttpResponse(
             json_res,
             content_type=u"application/json; charset=utf-8",

@@ -17,7 +17,7 @@ class Profile(models.Model):
 	release_date = models.DateField()
  
 class Report(models.Model):
-	type = models.IntegerField(default=0)
+	type = models.CharField(max_length=31,default='')
 	reporter = models.ForeignKey(Profile,related_name="reporter", on_delete=models.PROTECT)
 	target = models.ForeignKey(Profile, related_name="target",on_delete=models.PROTECT)
 	reason = models.TextField()
