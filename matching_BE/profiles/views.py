@@ -15,7 +15,7 @@ def create_profile(request):
             
         new_profile = Profile.objects.create(   
             #account = request.user,
-            account = get_object_or_404(Account, pk=body['account_id']),
+            account = get_object_or_404(Account, pk=body['accountId']),
             nickname = body['nickname'],
             major = body['major'],
             gender = body['gender'],
@@ -28,25 +28,8 @@ def create_profile(request):
             is_disabled = False,
             release_date = date.today()
         )
-
-        json_res = json.dumps(
-            {
-                "success": True,
-                "message": "생성 성공",
-                "account" : new_profile.account.email,
-                "nickname" : new_profile.nickname,
-                "major" : new_profile.major,
-                "gender" : new_profile.gender,
-                "bio" : new_profile.bio
-            },
-            ensure_ascii=False
-        )
                     
-        return HttpResponse(
-            json_res,
-            content_type=u"application/json; charset=utf-8",
-            status=200
-        )
+        return JsonResponse({"success" : True}, status=200)
 
 
 @require_http_methods(['DELETE'])  
@@ -177,8 +160,7 @@ def get_nicknames(request):
         
         json_res = json.dumps(
                 {
-                    "success": True,
-                    "nickname_list": nickname_json_all
+                    "nicknameList": nickname_json_all
                 },
                 ensure_ascii=False
             )
