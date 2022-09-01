@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_http_methods
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from .models import Matching, Follower
 from profiles.models import Profile
 from matzips.models import Matzip
@@ -8,13 +8,14 @@ from datetime import datetime, timedelta
 import json
 
 @require_http_methods(['POST'])
-def create_matching(request, matzip_id):
+def create_matching(request):
     if request.method == 'POST':
         if request.user.is_authenticated:
             body = json.loads(request.body.decode('utf-8'))
-            cur_matzip = get_object_or_404(Matzip, pk=matzip_id)
+            cur_matzip = get_object_or_404(Matzip,name=body['name'])
             
-            start = datetime.strptime(body['start_time'], "%Y-%m-%d %H:%M")
+            #시작시간+지속시간 = 종료시간
+            start = datetime.strptime(body['startTime'], "%Y-%m-%d %H:%M")
             time_str = body['duration']
             time_str = time_str.replace(" ", "")
             time_str = time_str.rstrip('분')
@@ -25,12 +26,12 @@ def create_matching(request, matzip_id):
             new_matching = Matching.objects.create(
                 leader = request.user.profile,
                 matzip = cur_matzip,
-                bio = body['bio'],
-                social_mode = body['social_mode'],
-                desired_gender = body['desired_gender'],
-                desired_major = body['desired_major'],
-                min_people = body['min_people'],
-                max_people = body['max_people'],
+                bio = body['description'],
+                social_mode = body['mode'],
+                desired_gender = body['gender'],
+                desired_major = body['major'],
+                min_people = body['min'],
+                max_people = body['max'],
                 start_time = start,
                 end_time = end,
                 duration = body['duration']
@@ -39,30 +40,25 @@ def create_matching(request, matzip_id):
             cur_matzip.waiting+=1
             cur_matzip.save()
 
-            new_matching_json = {
-                "leader" : new_matching.leader.nickname,
-                "matzip" : new_matching.matzip.name,
-                "created_time" : new_matching.created_time.strftime("%Y-%m-%d %H:%M:%S"),
-                "is_matched" : new_matching.is_matched,
-                "is_closed" : new_matching.is_closed,
-                "bio" : new_matching.bio,
-                "social_mode" : new_matching.social_mode,
-                "desired_gender" : new_matching.desired_gender,
-                "desired_major" : new_matching.desired_major,
-                "min_people" : new_matching.min_people,
-                "max_people" : new_matching.max_people,
-                "start_time" : new_matching.start_time.strftime("%Y-%m-%d %H:%M"),
-                "end_time" : new_matching.end_time.strftime("%Y-%m-%d %H:%M"),
-                "duration" : new_matching.duration
-            }
+            # new_matching_json = {
+            #     "leader" : new_matching.leader.nickname,
+            #     "matzip" : new_matching.matzip.name,
+            #     "created_time" : new_matching.created_time.strftime("%Y-%m-%d %H:%M:%S"),
+            #     "is_matched" : new_matching.is_matched,
+            #     "is_closed" : new_matching.is_closed,
+            #     "bio" : new_matching.bio,
+            #     "social_mode" : new_matching.social_mode,
+            #     "desired_gender" : new_matching.desired_gender,
+            #     "desired_major" : new_matching.desired_major,
+            #     "min_people" : new_matching.min_people,
+            #     "max_people" : new_matching.max_people,
+            #     "start_time" : new_matching.start_time.strftime("%Y-%m-%d %H:%M"),
+            #     "end_time" : new_matching.end_time.strftime("%Y-%m-%d %H:%M"),
+            #     "duration" : new_matching.duration
+            # }
 
-            
-                
-            return HttpResponse(
-                json.dumps(new_matching_json, ensure_ascii=False),
-                content_type=u"application/json; charset=utf-8",
-                status=200
-            )
+            return JsonResponse({"success":True}, status=200)
+
         else:
             json_res = json.dumps(
                 {
@@ -243,18 +239,8 @@ def join_cancel_matching(request, matching_id):
             
             cur_matching.save()
 
-            new_follower_json = {
-                "matching_id" : matching_id,
-                "nickname" : new_follower.profile.nickname,
-                "gender" : new_follower.profile.gender,
-                "major" : new_follower.profile.major
-            }
+            return JsonResponse({"success":True}, status=200)
 
-            return HttpResponse(
-                json.dumps(new_follower_json, ensure_ascii=False),
-                content_type=u"application/json; charset=utf-8",
-                status=200
-            )
 
         else:
             json_res = json.dumps(
@@ -302,19 +288,8 @@ def join_cancel_matching(request, matching_id):
                 cur_profile.cancel+=1
                 cur_profile.save()
                 
-                json_res = json.dumps(
-                    {
-                        "success": True,
-                        "message": "삭제 성공",
-                    },
-                    ensure_ascii=False
-                )
-                
-                return HttpResponse(
-                    json_res,
-                    content_type=u"application/json; charset=utf-8",
-                    status=200
-                )
+                return JsonResponse({"success":True}, status=200)
+
                 
             else:
                 json_res = json.dumps(
