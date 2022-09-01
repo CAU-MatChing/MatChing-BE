@@ -97,6 +97,7 @@ def activate(request, uidb64, token) :
             return JsonResponse({"message" : "INVALID_KEY"}, status=400)
 
 
+@require_http_methods(['POST'])
 def login(request) :
     if request.method == 'POST':
         body = json.loads(request.body.decode('UTF-8'))
@@ -161,6 +162,7 @@ def login(request) :
                 status=400
             )
 
+@require_http_methods(['POST'])
 def logout(request):
     if request.user.is_authenticated:
         auth_logout(request)
