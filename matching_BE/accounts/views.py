@@ -31,8 +31,8 @@ def sign_up(request) :
         body = json.loads(request.body.decode('utf-8'))
         try:
             # 이메일 유효성을 검사(메세지를 받을 수 있는 이메일인가?)
-            validate_email(body["email"])
-            email     = body["email"]
+            validate_email(body["userEmail"])
+            email     = body["userEmail"]
             password  = body["password"]
             
             # email에 @cau.ac.kr로 끝나지 않으면 에러메세지 반환하는 코드를 추가
@@ -51,7 +51,7 @@ def sign_up(request) :
             
             #메일발송설정
             sendEmail = EMAIL_HOST_USER
-            recvEmail = body["email"]
+            recvEmail = body["userEmail"]
             password = EMAIL_HOST_PASSWORD
             smtpName = EMAIL_HOST #smtp 서버 주소
             smtpPort = EMAIL_PORT #smtp 포트 번호
@@ -66,8 +66,13 @@ def sign_up(request) :
             s.login(sendEmail , password) #로그인
             s.sendmail(sendEmail, recvEmail, msg.as_string()) #메일 전송, 문자열로 변환하여 보냅니다.
             
-            return JsonResponse({"message" : "SUCCESS"}, status=200)
-       
+            return JsonResponse(
+                {
+                    "success" : True,
+                    "accountId" : user.id
+                }, status=200
+            )
+
         except IntegrityError:
             return JsonResponse({"message" : "Error"}, status=400)
         except KeyError:
@@ -136,7 +141,6 @@ def login(request) :
             json_res = json.dumps(
                 {
                     "success": True,
-                    "message": "로그인 성공",
                 },
                 ensure_ascii=False
             )
@@ -167,19 +171,8 @@ def logout(request):
     if request.user.is_authenticated:
         auth_logout(request)
         
-        json_res = json.dumps(
-            {
-                "success": True,
-                "message": "로그아웃 성공",
-            },
-            ensure_ascii=False
-        )
-        
-        return HttpResponse(
-            json_res,
-            content_type=u"application/json; charset=utf-8",
-            status=200
-        )
+        return JsonResponse({"success" : True}, status=200)
+
 
     else:
         json_res = json.dumps(
@@ -202,19 +195,8 @@ def delete_account(request):
         request.user.delete()
         auth_logout(request)
         
-        json_res = json.dumps(
-                {
-                    "success": True,
-                    "message": "회원탈퇴성공",
-                },
-                ensure_ascii=False
-            )
-            
-        return HttpResponse(
-            json_res,
-            content_type=u"application/json; charset=utf-8",
-            status=200
-        )
+        return JsonResponse({"success" : True}, status=200)
+
     
     else:
         json_res = json.dumps(
