@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse,HttpResponse
+from datetime import datetime, timedelta
 from .models import *
 from matchings.models import *
 import json
@@ -136,16 +137,27 @@ def get_update_delete_matzip(request, id):
             status=200
         )
 
-
+# 현재 맛집 및 매칭 정보 응답
 @require_http_methods(['GET'])  
 def getall_now_matzip(request):
     if request.method == "GET":
+        not_closed_yet = Matching.objects.filter(is_closed=False, start_time__range=[datetime.now()-timedelta(days=30),datetime.now()])
+        
+        # 날짜가 지났으나 마감되지 않은 매칭 닫아주기
+        for cur_not_closed in not_closed_yet:
+            cur_not_closed.is_closed = True
+            cur_not_closed.save()
+
         now_matzip_all = Matzip.objects.all()
 
         now_matzip_json_all = []
         for now_matzip in now_matzip_all:
-            now_matching_all = Matching.objects.filter(matzip = now_matzip.id, is_closed = False)
+            now_matching_all = Matching.objects.filter(matzip = now_matzip.id, is_closed = False,start_time__range=[datetime.now()+timedelta(seconds=1),datetime.now()+timedelta(days=30)])
             
+            # 맛집 대기팀 수(waiting) 갱신
+            now_matzip.waiting = now_matching_all.count()
+            now_matzip.save()
+
             now_matching_json_all=[]
             for now_matching in now_matching_all:
                 now_follower_all = Follower.objects.filter(matching = now_matching.id)
@@ -183,13 +195,13 @@ def getall_now_matzip(request):
             }
             now_matzip_json_all.append(now_matzip_json)
 
-            json_res = json.dumps(
-                {"list" : now_matzip_json_all},
-                ensure_ascii=False
-            )  
+        json_res = json.dumps(
+            {"list" : now_matzip_json_all},
+            ensure_ascii=False
+        )  
 
-            return HttpResponse(
-                json_res,
-                content_type=u"application/json; charset=utf-8",
-                status=200
-            )
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=200
+        )
