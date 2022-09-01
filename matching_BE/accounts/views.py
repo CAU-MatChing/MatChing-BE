@@ -218,7 +218,7 @@ def delete_account(request):
         json_res = json.dumps(
             {
                 "success": False,
-                "message": "사용자인증 없음",
+                "message": "사용자인증실패",
             },
         )
             
