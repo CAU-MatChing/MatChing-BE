@@ -16,7 +16,7 @@ def create_getall_matzip(request):
                 json_res = json.dumps(
                         {
                             "success": False,
-                            "message": "식당 중복 등록",
+                            "errorMessage": "식당 이름 중복",
                         },
                         ensure_ascii=False
                     )
@@ -29,14 +29,11 @@ def create_getall_matzip(request):
 
             new_matzip = Matzip.objects.create(
                 name = body['name'],
-                location = body['location'],
                 waiting = 0
             )
             
             new_matzip_json = {
                 "name" : new_matzip.name,
-                "location" : new_matzip.location,
-                "waiting" : new_matzip.waiting
             }
 
             
@@ -69,7 +66,6 @@ def create_getall_matzip(request):
         for matzip in matzip_all:
             matzip_json = {
                 "name" : matzip.name,
-                "location" : matzip.location,
                 "waiting" : matzip.waiting
             }
             matzip_json_all.append(matzip_json)
@@ -88,7 +84,6 @@ def get_update_delete_matzip(request, id):
         
         get_matzip_json = {
             "name" : get_matzip.name,
-            "location" : get_matzip.location,
             "waiting" : get_matzip.waiting
         }
             
@@ -103,13 +98,11 @@ def get_update_delete_matzip(request, id):
         update_matzip = get_object_or_404(Matzip, pk=id)
         
         update_matzip.name = body['name']
-        update_matzip.location = body['location']
         
         update_matzip.save()
         
         update_matzip_json = {
             "name" : update_matzip.name,
-            "location" : update_matzip.location,
             "waiting" : update_matzip.waiting
         }
             
@@ -166,37 +159,36 @@ def getall_now_matzip(request):
                 for now_follower in now_follower_all:
                     now_follower_json_all.append(now_follower.profile.nickname)
                 
+                tag = [now_matching.desired_gender,now_matching.desired_major,now_matching.social_mode]
                 now_matching_json = {
-                    "matching_id" : now_matching.id,
-                    "matzip" : now_matching.matzip.name,
-                    "bio" : now_matching.bio,
+                    "tags" : tag,
+                    "startTime" : now_matching.start_time.strftime("%Y-%m-%d %H:%M"),
+                    "endTime" : now_matching.end_time.strftime("%Y-%m-%d %H:%M"),
+                    "duration" : now_matching.duration,
+                    "max" : now_matching.max_people,
+                    "min" : now_matching.min_people,
+                    "id" : now_matching.id,
+                    "description" : now_matching.bio,
                     "leader" : now_matching.leader.nickname,
                     "created_time" : now_matching.created_time.strftime("%Y-%m-%d %H:%M:%S"),
-                    "remain" : now_matching.max_people-len(now_follower_json_all),
+                    # "remain" : now_matching.max_people-len(now_follower_json_all),
                     "is_matched" : now_matching.is_matched,
                     "is_closed" : now_matching.is_closed,
-                    "social_mode" : now_matching.social_mode,
-                    "desired_gender" : now_matching.desired_gender,
-                    "desired_major" : now_matching.desired_major,
-                    "min_people" : now_matching.min_people,
-                    "max_people" : now_matching.max_people,
-                    "start_time" : now_matching.start_time.strftime("%Y-%m-%d %H:%M"),
-                    "end_time" : now_matching.end_time.strftime("%Y-%m-%d %H:%M"),
-                    "duration" : now_matching.duration,
-			        "followers": now_follower_json_all 
+			        "follower": now_follower_json_all 
                 }
                 now_matching_json_all.append(now_matching_json)
                 
             now_matzip_json = {
                 "name" : now_matzip.name,
-                "location" : now_matzip.location,
                 "waiting" : now_matzip.waiting,
                 "matchings" : now_matching_json_all
             }
             now_matzip_json_all.append(now_matzip_json)
 
         json_res = json.dumps(
-            {"list" : now_matzip_json_all},
+            {
+                "matchingList" : now_matzip_json_all
+            },
             ensure_ascii=False
         )  
 
