@@ -74,7 +74,7 @@ PROJECT_APPS = [
 ]
 
 THIRD_PARTY_APPS = [ 
-    
+    "corsheaders",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS + THIRD_PARTY_APPS
@@ -167,3 +167,20 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR/'media'
 
 AUTH_USER_MODEL = 'accounts.Account'
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
+
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [ 
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost",
+    "http://127.0.0.1"
+]
