@@ -31,15 +31,9 @@ def create_getall_matzip(request):
                 name = body['name'],
                 waiting = 0
             )
-            
-            new_matzip_json = {
-                "name" : new_matzip.name,
-            }
 
-            
-            #응답수정 가능성 : success:true만 보내느냐..
             return HttpResponse(
-                json.dumps(new_matzip_json, ensure_ascii=False),
+                json.dumps({"success" : True}, ensure_ascii=False),
                 content_type=u"application/json; charset=utf-8",
                 status=200
             )
@@ -48,7 +42,7 @@ def create_getall_matzip(request):
             json_res = json.dumps(
                 {
                     "success": False,
-                    "message": "사용자인증실패"
+                    "errorMessage": "사용자인증실패"
                 },
                 ensure_ascii=False
             )
@@ -72,7 +66,11 @@ def create_getall_matzip(request):
             matzip_json_all.append(matzip_json)
             
         return HttpResponse(
-            json.dumps(matzip_json_all,ensure_ascii=False),
+            json.dumps(
+                {
+                    "success" : True,
+                    "matzipList" : matzip_json_all
+                },ensure_ascii=False),
             content_type=u"application/json; charset=utf-8",
             status=200
         )
@@ -100,8 +98,7 @@ def get_delete_matzip(request, id):
 
         json_res = json.dumps(
             {
-                "success": True,
-                "message": "맛집 삭제 성공",
+                "success": True
             },
             ensure_ascii=False
         )
@@ -168,9 +165,9 @@ def getall_now_matzip(request):
             }
             now_matzip_json_all.append(now_matzip_json)
 
-        #get요청에 success true달까말까 합의
         json_res = json.dumps(
             {
+                "success" : True,
                 "matchingList" : now_matzip_json_all
             },
             ensure_ascii=False

@@ -64,7 +64,7 @@ def create_matching(request):
             json_res = json.dumps(
                 {
                     "success": False,
-                    "message": "사용자인증실패"
+                    "errorMessage": "사용자인증실패"
                 },
                 ensure_ascii=False
             )
@@ -131,8 +131,7 @@ def read_update_delete_matching(request, matching_id):
 
         json_res = json.dumps(
             {
-                "success": True,
-                "message": "삭제 성공",
+                "success": True
             },
             ensure_ascii=False
         )
@@ -159,7 +158,7 @@ def join_matching(request, matching_id):
                 json_res = json.dumps(
                         {
                             "success": False,
-                            "message": "리더와 팔로워가 동일함"
+                            "errorMessage": "리더와 팔로워가 동일함"
                         },
                         ensure_ascii=False
                     )
@@ -175,7 +174,7 @@ def join_matching(request, matching_id):
                 json_res = json.dumps(
                         {
                             "success": False,
-                            "message": "매칭 중복 신청"
+                            "errorMessage": "매칭 중복 신청"
                         },
                         ensure_ascii=False
                     )
@@ -192,7 +191,7 @@ def join_matching(request, matching_id):
                     json_res = json.dumps(
                         {
                             "success": False,
-                            "message": "성별조건불일치"
+                            "errorMessage": "성별조건불일치"
                         },
                         ensure_ascii=False
                     )
@@ -209,7 +208,7 @@ def join_matching(request, matching_id):
                     json_res = json.dumps(
                         {
                             "success": False,
-                            "message": "전공조건불일치"
+                            "errorMessage": "전공조건불일치"
                         },
                         ensure_ascii=False
                     )
@@ -248,7 +247,7 @@ def join_matching(request, matching_id):
             json_res = json.dumps(
                 {
                     "success": False,
-                    "message": "사용자인증실패"
+                    "errorMessage": "사용자인증실패"
                 },
                 ensure_ascii=False
             )
@@ -299,7 +298,7 @@ def cancel_matching(request, matching_id):
                 json_res = json.dumps(
                     {
                         "success": False,
-                        "message": "매칭취소시간지남"
+                        "errorMessage": "매칭취소시간지남"
                     },
                     ensure_ascii=False
                 )
@@ -314,7 +313,7 @@ def cancel_matching(request, matching_id):
             json_res = json.dumps(
                 {
                     "success": False,
-                    "message": "사용자인증실패"
+                    "errorMessage": "사용자인증실패"
                 },
                 ensure_ascii=False
             )

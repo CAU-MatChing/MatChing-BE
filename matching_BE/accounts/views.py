@@ -73,28 +73,28 @@ def sign_up(request) :
             return JsonResponse(
                 {
                     "success" : False,
-                    "message" : "Integrity_Error"                
+                    "errorMessage" : "Integrity_Error"                
                 }, status=400
             )
         except KeyError:
             return JsonResponse(
                 {
                     "success" : False,
-                    "message" : "INVALID_KEY"
+                    "errorMessage" : "INVALID_KEY"
                 }, status=400
             )
         except TypeError:
             return JsonResponse(
                 {
                     "success" : False,
-                    "message" : "INVALID_TYPE"
+                    "errorMessage" : "INVALID_TYPE"
                 }, status=400
             )
         except ValidationError:
             return JsonResponse(
                 {
                     "success" : False,
-                    "message" : "VALIDATION_ERROR"
+                    "errorMessage" : "VALIDATION_ERROR"
                 }, status=400
             )
         
@@ -113,7 +113,7 @@ def activate(request, uidb64, token) :
             return JsonResponse(
                 {
                     "success" : False,
-                    "message" : "AUTH FAIL"
+                    "errorMessage" : "AUTH FAIL"
                 }, status=400
             )
 
@@ -121,14 +121,14 @@ def activate(request, uidb64, token) :
             return JsonResponse(
                 {
                     "success" : False,
-                    "message" : "TYPE_ERROR"
+                    "errorMessage" : "TYPE_ERROR"
                 }, status=400
             )
         except KeyError:
             return JsonResponse(
                 {
                     "success" : False,
-                    "message" : "INVALID_KEY"
+                    "errorMessage" : "INVALID_KEY"
                 }, status=400
             )
 
@@ -154,7 +154,7 @@ def login(request) :
                     json_res = json.dumps(
                         {
                             "success": False,
-                            "message": "정지 회원"
+                            "errorMessage": "정지 회원"
                         },
                         ensure_ascii=False
                     )
@@ -186,7 +186,7 @@ def login(request) :
             json_res = json.dumps(
                 {
                     "success": False,
-                    "message": "로그인 실패"
+                    "errorMessage": "로그인 실패"
                 },
                 ensure_ascii=False
             )
@@ -209,7 +209,7 @@ def logout(request):
         json_res = json.dumps(
             {
                 "success": False,
-                "message": "사용자인증실패"
+                "errorMessage": "사용자인증실패"
             },
             ensure_ascii=False
         )
@@ -233,7 +233,7 @@ def delete_account(request):
         json_res = json.dumps(
             {
                 "success": False,
-                "message": "사용자인증실패"
+                "errorMessage": "사용자인증실패"
             },
         )
             

@@ -43,8 +43,7 @@ def delete_profile(requests, account_id):
 
         json_res = json.dumps(
             {
-                "success": True,
-                "message": "프로필 삭제 성공",
+                "success": True
             },
             ensure_ascii=False
             )
@@ -141,7 +140,11 @@ def get_my_matchings(request):
                 matching_json_all.append(matching_json)
     
             return HttpResponse(
-                json.dumps({"userMatching" : matching_json_all}, ensure_ascii=False),
+                json.dumps(
+                    {
+                        "success" : True,
+                        "userMatching" : matching_json_all
+                    }, ensure_ascii=False),
                 content_type=u"application/json; charset=utf-8",
                 status=200
             )
@@ -151,7 +154,7 @@ def get_my_matchings(request):
             json_res = json.dumps(
                     {
                         "success": False,
-                        "message": "사용자인증실패"
+                        "errorMessage": "사용자인증실패"
                     },
                     ensure_ascii=False
                 )
@@ -175,6 +178,7 @@ def get_nicknames(request):
         
         json_res = json.dumps(
                 {
+                    "success" : True,
                     "nicknameList": nickname_json_all
                 },
                 ensure_ascii=False
@@ -224,8 +228,7 @@ def create_report(request):
         )
         json_res = json.dumps(
             {
-                "success": True,
-                "message": "신고 접수 성공"
+                "success": True
             },
             ensure_ascii=False
         )
