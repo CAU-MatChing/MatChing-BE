@@ -54,6 +54,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     "3.38.40.75",
+    "www.mat-ching.kro.kr",
 ]
 
 
