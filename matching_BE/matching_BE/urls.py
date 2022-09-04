@@ -19,8 +19,8 @@ from django.urls import path, include
 # cy : add path 'account/'
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('profile/', include('profiles.urls')),
-    path('account/', include('accounts.urls')),
-    path('matzip/', include('matzips.urls')),
-    path('matching/',include('matchings.urls')),
+    path('api/profile/', include('profiles.urls')),
+    path('api/account/', include('accounts.urls')),
+    path('api/matzip/', include('matzips.urls')),
+    path('api/matching/',include('matchings.urls')),
 ]

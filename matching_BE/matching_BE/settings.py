@@ -53,6 +53,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    "127.0.0.1",
     "3.38.40.75",
     "www.mat-ching.kro.kr",
 ]
