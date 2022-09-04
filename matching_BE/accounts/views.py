@@ -35,10 +35,6 @@ def sign_up(request) :
             email     = body["userEmail"]
             password  = body["password"]
             
-            # email에 @cau.ac.kr로 끝나지 않으면 에러메세지 반환하는 코드를 추가
-            if "@cau.ac.kr" not in email:
-                return JsonResponse({"message" : "BAD_EMAIL"}, status=400)
-            
             # 디비에 저장
             user = Account.objects.create_user(email, password)
             
@@ -157,8 +153,8 @@ def login(request) :
         
                     json_res = json.dumps(
                         {
-                            "success": True,
-                            "message": "정지 회원",
+                            "success": False,
+                            "message": "정지 회원"
                         },
                         ensure_ascii=False
                     )
@@ -175,7 +171,7 @@ def login(request) :
 
             json_res = json.dumps(
                 {
-                    "success": True,
+                    "success": True
                 },
                 ensure_ascii=False
             )
@@ -190,7 +186,7 @@ def login(request) :
             json_res = json.dumps(
                 {
                     "success": False,
-                    "message": "로그인 실패",
+                    "message": "로그인 실패"
                 },
                 ensure_ascii=False
             )
@@ -213,7 +209,7 @@ def logout(request):
         json_res = json.dumps(
             {
                 "success": False,
-                "message": "사용자인증실패",
+                "message": "사용자인증실패"
             },
             ensure_ascii=False
         )
@@ -237,7 +233,7 @@ def delete_account(request):
         json_res = json.dumps(
             {
                 "success": False,
-                "message": "사용자인증실패",
+                "message": "사용자인증실패"
             },
         )
             

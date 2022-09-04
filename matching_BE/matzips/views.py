@@ -16,7 +16,7 @@ def create_getall_matzip(request):
                 json_res = json.dumps(
                         {
                             "success": False,
-                            "errorMessage": "식당 이름 중복",
+                            "errorMessage": "식당 이름 중복"
                         },
                         ensure_ascii=False
                     )
@@ -48,7 +48,7 @@ def create_getall_matzip(request):
             json_res = json.dumps(
                 {
                     "success": False,
-                    "message": "사용자인증실패",
+                    "message": "사용자인증실패"
                 },
                 ensure_ascii=False
             )

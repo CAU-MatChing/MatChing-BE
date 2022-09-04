@@ -151,7 +151,7 @@ def get_my_matchings(request):
             json_res = json.dumps(
                     {
                         "success": False,
-                        "message": "사용자인증실패",
+                        "message": "사용자인증실패"
                     },
                     ensure_ascii=False
                 )
@@ -225,7 +225,7 @@ def create_report(request):
         json_res = json.dumps(
             {
                 "success": True,
-                "message": "신고 접수 성공",
+                "message": "신고 접수 성공"
             },
             ensure_ascii=False
         )
