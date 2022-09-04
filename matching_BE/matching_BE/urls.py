@@ -15,10 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from matchings.views import get_main
 
-# cy : add path 'account/'
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', get_main),
     path('api/profile/', include('profiles.urls')),
     path('api/account/', include('accounts.urls')),
     path('api/matzip/', include('matzips.urls')),

@@ -7,6 +7,11 @@ from matzips.models import Matzip
 from datetime import datetime, timedelta
 import json
 
+@require_http_methods(['GET'])
+def get_main(request):
+    if request.method == 'GET':
+        return JsonResponse({'success':True},status=200)
+        
 @require_http_methods(['POST'])
 def create_matching(request):
     if request.method == 'POST':
