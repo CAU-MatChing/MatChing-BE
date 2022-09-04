@@ -6,8 +6,8 @@ from .models import *
 from matchings.models import *
 import json
 
-@require_http_methods(['POST','GET'])
-def create_getall_matzip(request):
+@require_http_methods(['POST'])
+def create_matzip(request):
     if request.method == 'POST':
         if request.user.is_authenticated:
             body = json.loads(request.body.decode('utf-8'))
@@ -53,27 +53,6 @@ def create_getall_matzip(request):
                 status=401
             )
 
-    #필요없는건가? 맛집이름만Get하는 메소드
-    elif request.method == 'GET':
-        matzip_all = Matzip.objects.all()
-        
-        matzip_json_all = []
-        for matzip in matzip_all:
-            matzip_json = {
-                "name" : matzip.name,
-                "waiting" : matzip.waiting
-            }
-            matzip_json_all.append(matzip_json)
-            
-        return HttpResponse(
-            json.dumps(
-                {
-                    "success" : True,
-                    "matzipList" : matzip_json_all
-                },ensure_ascii=False),
-            content_type=u"application/json; charset=utf-8",
-            status=200
-        )
 
 #민경이가 안쓸듯
 @require_http_methods(['DELETE','GET'])  
