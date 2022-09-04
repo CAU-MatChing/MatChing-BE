@@ -23,6 +23,7 @@ def create_matching(request):
             sum = int(list[0])*60 + int(list[1])
             end = start + timedelta(minutes=+sum)
             
+            #이부분만 민경이랑 합의하면 됨
             new_matching = Matching.objects.create(
                 leader = request.user.profile,
                 matzip = cur_matzip,
@@ -75,6 +76,7 @@ def create_matching(request):
             )
         
 
+#민경이가 안쓸듯?
 @require_http_methods(['GET','DELETE'])
 def read_update_delete_matching(request, matching_id):
     # 매칭 정보 하나를 불러오는 코드
@@ -141,10 +143,10 @@ def read_update_delete_matching(request, matching_id):
             status=200
         )
 
-
-@require_http_methods(['POST','DELETE'])
-def join_cancel_matching(request, matching_id):
-    # 팔로워가 매칭을 신청하는 코드
+# 팔로워가 매칭을 신청하는 코드
+# 민경이랑 senddata/url 합의해야 함
+@require_http_methods(['POST'])
+def join_matching(request, matching_id):
     if request.method == 'POST':
         if request.user.is_authenticated:
             # body = json.loads(request.body.decode('utf-8'))
@@ -257,9 +259,11 @@ def join_cancel_matching(request, matching_id):
                 status=401
             )
 
-    
-    # 팔로워가 매칭을 취소하는 코드
-    elif request.method == 'DELETE':
+# 팔로워가 매칭을 취소하는 코드
+#민경이랑 url합의
+@require_http_methods(['DELETE'])
+def cancel_matching(request, matching_id):  
+    if request.method == 'DELETE':
         if request.user.is_authenticated:
             cur_matching = get_object_or_404(Matching, pk=matching_id)
             cur_follower = get_object_or_404(Follower, profile=request.user.profile, matching = cur_matching)

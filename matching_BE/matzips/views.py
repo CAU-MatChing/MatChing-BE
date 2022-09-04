@@ -37,7 +37,7 @@ def create_getall_matzip(request):
             }
 
             
-                
+            #응답수정 가능성 : success:true만 보내느냐..
             return HttpResponse(
                 json.dumps(new_matzip_json, ensure_ascii=False),
                 content_type=u"application/json; charset=utf-8",
@@ -59,6 +59,7 @@ def create_getall_matzip(request):
                 status=401
             )
 
+    #필요없는건가? 맛집이름만Get하는 메소드
     elif request.method == 'GET':
         matzip_all = Matzip.objects.all()
         
@@ -76,9 +77,9 @@ def create_getall_matzip(request):
             status=200
         )
 
-
-@require_http_methods(['DELETE','PATCH','GET'])  
-def get_update_delete_matzip(request, id):
+#민경이가 안쓸듯
+@require_http_methods(['DELETE','GET'])  
+def get_delete_matzip(request, id):
     if request.method == "GET":
         get_matzip = get_object_or_404(Matzip, pk=id)
         
@@ -89,25 +90,6 @@ def get_update_delete_matzip(request, id):
             
         return HttpResponse(
             json.dumps(get_matzip_json,ensure_ascii=False),
-            content_type=u"application/json; charset=utf-8",
-            status=200
-        )
-
-    elif request.method == "PATCH":
-        body = json.loads(request.body.decode('utf-8'))
-        update_matzip = get_object_or_404(Matzip, pk=id)
-        
-        update_matzip.name = body['name']
-        
-        update_matzip.save()
-        
-        update_matzip_json = {
-            "name" : update_matzip.name,
-            "waiting" : update_matzip.waiting
-        }
-            
-        return HttpResponse(
-            json.dumps(update_matzip_json, ensure_ascii=False),
             content_type=u"application/json; charset=utf-8",
             status=200
         )
@@ -159,6 +141,7 @@ def getall_now_matzip(request):
                 for now_follower in now_follower_all:
                     now_follower_json_all.append(now_follower.profile.nickname)
                 
+                #gender, mode는 우리쪽에서 한글로 바꿔서 보낼수도 있음
                 tag = [now_matching.desired_gender,now_matching.desired_major,now_matching.social_mode]
                 now_matching_json = {
                     "tags" : tag,
@@ -166,15 +149,15 @@ def getall_now_matzip(request):
                     "endTime" : now_matching.end_time.strftime("%Y-%m-%d %H:%M"),
                     "duration" : now_matching.duration,
                     "max" : now_matching.max_people,
-                    "min" : now_matching.min_people,
+                    "min" : now_matching.min_people, #민경이쪽 빠진거
                     "id" : now_matching.id,
                     "description" : now_matching.bio,
-                    "leader" : now_matching.leader.nickname,
-                    "created_time" : now_matching.created_time.strftime("%Y-%m-%d %H:%M:%S"),
+                    "leader" : now_matching.leader.nickname, #민경이쪽 빠진거
+                    "created_time" : now_matching.created_time.strftime("%Y-%m-%d %H:%M:%S"), #민경이쪽 빠진거
                     # "remain" : now_matching.max_people-len(now_follower_json_all),
-                    "is_matched" : now_matching.is_matched,
-                    "is_closed" : now_matching.is_closed,
-			        "follower": now_follower_json_all 
+                    "is_matched" : now_matching.is_matched, #민경이쪽 빠진거
+                    "is_closed" : now_matching.is_closed, #민경이쪽 빠진거
+			        "follower": now_follower_json_all #리더랑 합쳐서 보낼지 합의/따로보낼지
                 }
                 now_matching_json_all.append(now_matching_json)
                 
@@ -185,6 +168,7 @@ def getall_now_matzip(request):
             }
             now_matzip_json_all.append(now_matzip_json)
 
+        #get요청에 success true달까말까 합의
         json_res = json.dumps(
             {
                 "matchingList" : now_matzip_json_all

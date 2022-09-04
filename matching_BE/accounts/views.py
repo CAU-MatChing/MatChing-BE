@@ -74,13 +74,33 @@ def sign_up(request) :
             )
 
         except IntegrityError:
-            return JsonResponse({"message" : "Error"}, status=400)
+            return JsonResponse(
+                {
+                    "success" : False,
+                    "message" : "Integrity_Error"                
+                }, status=400
+            )
         except KeyError:
-            return JsonResponse({"message" : "INVALID_KEY"}, status=400)
+            return JsonResponse(
+                {
+                    "success" : False,
+                    "message" : "INVALID_KEY"
+                }, status=400
+            )
         except TypeError:
-            return JsonResponse({"message" : "INVALID_TYPE"}, status=400)
+            return JsonResponse(
+                {
+                    "success" : False,
+                    "message" : "INVALID_TYPE"
+                }, status=400
+            )
         except ValidationError:
-            return JsonResponse({"message" : "VALIDATION_ERROR"}, status=400)
+            return JsonResponse(
+                {
+                    "success" : False,
+                    "message" : "VALIDATION_ERROR"
+                }, status=400
+            )
         
 def activate(request, uidb64, token) :
     if request.method == 'GET':
@@ -94,12 +114,27 @@ def activate(request, uidb64, token) :
 
                 return redirect('https://github.com/hectick') #리다이렉트 페이지
         
-            return JsonResponse({"message" : "AUTH FAIL"}, status=400)
+            return JsonResponse(
+                {
+                    "success" : False,
+                    "message" : "AUTH FAIL"
+                }, status=400
+            )
 
         except ValidationError:
-            return JsonResponse({"message" : "TYPE_ERROR"}, status=400)
+            return JsonResponse(
+                {
+                    "success" : False,
+                    "message" : "TYPE_ERROR"
+                }, status=400
+            )
         except KeyError:
-            return JsonResponse({"message" : "INVALID_KEY"}, status=400)
+            return JsonResponse(
+                {
+                    "success" : False,
+                    "message" : "INVALID_KEY"
+                }, status=400
+            )
 
 
 @require_http_methods(['POST'])
