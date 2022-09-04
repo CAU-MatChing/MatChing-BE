@@ -103,7 +103,7 @@ def getall_now_matzip(request):
 
         now_matzip_json_all = []
         for now_matzip in now_matzip_all:
-            now_matching_all = Matching.objects.filter(matzip = now_matzip.id, is_closed = False,start_time__range=[datetime.now()+timedelta(seconds=1),datetime.now()+timedelta(days=30)])
+            now_matching_all = Matching.objects.filter(matzip = now_matzip.id, is_closed = False,start_time__range=[datetime.now()+timedelta(seconds=1),datetime.now()+timedelta(days=30)]).order_by('start_time')
             
             # 맛집 대기팀 수(waiting) 갱신
             now_matzip.waiting = now_matching_all.count()
@@ -125,15 +125,11 @@ def getall_now_matzip(request):
                     "endTime" : now_matching.end_time.strftime("%Y-%m-%d %H:%M"),
                     "duration" : now_matching.duration,
                     "max" : now_matching.max_people,
-                    "min" : now_matching.min_people, #민경이쪽 빠진거
+                    "min" : now_matching.min_people, 
                     "id" : now_matching.id,
                     "description" : now_matching.bio,
-                    "leader" : now_matching.leader.nickname, #민경이쪽 빠진거
-                    "created_time" : now_matching.created_time.strftime("%Y-%m-%d %H:%M:%S"), #민경이쪽 빠진거
-                    # "remain" : now_matching.max_people-len(now_follower_json_all),
-                    "is_matched" : now_matching.is_matched, #민경이쪽 빠진거
-                    "is_closed" : now_matching.is_closed, #민경이쪽 빠진거
-			        "follower": now_follower_json_all #리더랑 합쳐서 보낼지 합의/따로보낼지
+                    "leader" : now_matching.leader.nickname, 
+			        "follower": now_follower_json_all 
                 }
                 now_matching_json_all.append(now_matching_json)
                 
