@@ -53,14 +53,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "http://3.38.40.75:8000",
-    "http://www.mat-ching.kro.kr:8000",
-    "43.200.185.157:8000",
-    "www.mat-ching.kro.kr:8000",
-    "www.mat-ching.kro.kr:8000",
-    'http://localhost:8000/',
-    'http://127.0.0.1:8000',
-    '127.0.0.1',
+    "3.38.40.75",
 ]
 
 
