@@ -246,7 +246,7 @@ def delete_account(request):
 
 @require_http_methods(['GET'])
 def check_login(request):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         return JsonResponse({"success": True},status=200)
     else:
         return JsonResponse({"success" : False},status=200)

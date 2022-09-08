@@ -29,7 +29,8 @@ def create_get_matzip(request):
 
             new_matzip = Matzip.objects.create(
                 name = body['name'],
-                waiting = 0
+                waiting = 0,
+                matched = 0
             )
 
             return HttpResponse(
@@ -122,7 +123,7 @@ def getall_now_matzip(request):
             cur_not_closed.is_closed = True
             cur_not_closed.save()
 
-        now_matzip_all = Matzip.objects.all()
+        now_matzip_all = Matzip.objects.all().order_by('-matched')
 
         now_matzip_json_all = []
         for now_matzip in now_matzip_all:
@@ -132,29 +133,37 @@ def getall_now_matzip(request):
             now_matzip.waiting = now_matching_all.count()
             now_matzip.save()
 
-            now_matching_json_all=[]
-            for now_matching in now_matching_all:
-                now_follower_all = Follower.objects.filter(matching = now_matching.id)
-                
-                now_follower_json_all=[]
-                for now_follower in now_follower_all:
-                    now_follower_json_all.append(now_follower.profile.nickname)
-                
-                #gender, mode는 우리쪽에서 한글로 바꿔서 보낼수도 있음
-                tag = [now_matching.desired_gender,now_matching.desired_major,now_matching.social_mode]
+            if now_matzip.waiting == 0:
+                now_matching_json_all=[]
                 now_matching_json = {
-                    "tags" : tag,
-                    "startTime" : now_matching.start_time.strftime("%Y-%m-%d %H:%M"),
-                    "endTime" : now_matching.end_time.strftime("%Y-%m-%d %H:%M"),
-                    "duration" : now_matching.duration,
-                    "max" : now_matching.max_people,
-                    "min" : now_matching.min_people, 
-                    "id" : now_matching.id,
-                    "description" : now_matching.bio,
-                    "leader" : now_matching.leader.nickname, 
-			        "follower": now_follower_json_all 
+                    "id" : 0
                 }
                 now_matching_json_all.append(now_matching_json)
+                
+            else:
+                now_matching_json_all=[]
+                for now_matching in now_matching_all:
+                    now_follower_all = Follower.objects.filter(matching = now_matching.id)
+                    
+                    now_follower_json_all=[]
+                    for now_follower in now_follower_all:
+                        now_follower_json_all.append(now_follower.profile.nickname)
+                    
+                    #gender, mode는 우리쪽에서 한글로 바꿔서 보낼수도 있음
+                    tag = [now_matching.desired_gender,now_matching.desired_major,now_matching.social_mode]
+                    now_matching_json = {
+                        "tags" : tag,
+                        "startTime" : now_matching.start_time.strftime("%Y-%m-%d %H:%M"),
+                        "endTime" : now_matching.end_time.strftime("%Y-%m-%d %H:%M"),
+                        "duration" : now_matching.duration,
+                        "max" : now_matching.max_people,
+                        "min" : now_matching.min_people, 
+                        "id" : now_matching.id,
+                        "description" : now_matching.bio,
+                        "leader" : now_matching.leader.nickname, 
+                        "follower": now_follower_json_all 
+                    }
+                    now_matching_json_all.append(now_matching_json)
                 
             now_matzip_json = {
                 "name" : now_matzip.name,

@@ -6,6 +6,7 @@ from .models import *
 from matchings.models import *
 import json
 from datetime import date,timedelta, datetime
+from django.db.models import Q
 
 # Create your views here.
 @require_http_methods(['POST'])  
@@ -55,8 +56,6 @@ def delete_profile(requests, account_id):
         )
 
 
-#매칭 닫혔으나 기간이 지난거를 보여줄지 말지?(성사 안된 매칭)
-#닫아준거 보내줄지(어쨌뜬 매칭기간 지난거 보내줄지)
 @require_http_methods(['GET'])  
 def get_my_matchings(request):
     if request.method == 'GET':
@@ -72,7 +71,8 @@ def get_my_matchings(request):
             matching_json_all=[]
             
             #내가 리더인 경우
-            matching_leader_all = Matching.objects.filter(leader = my_profile)    
+            matching_leader_all = Matching.objects.filter(Q(leader = my_profile) & ~Q(is_matched=False, is_closed=True))
+             
             for matching in matching_leader_all:
                 follower_all = Follower.objects.filter(matching = matching.id)
                 
@@ -107,37 +107,39 @@ def get_my_matchings(request):
                 matching = matching_follower.matching
                 
                 # 날짜가 지났으나 마감되지 않은 매칭 닫아주기 - follower
-                if matching.is_closed == False and matching.start_date < datetime.now():
+                if matching.is_closed == False and matching.start_time < datetime.now():
                     matching.is_closed = True
                     matching.save()
 
-                follower_all = Follower.objects.filter(matching = matching.id)
-                
-                follower_json_all=[]
-                for follower in follower_all:
-                    follower_json_all.append(follower.profile.nickname)
-                
-                #보낼때 성사된 매칭만 보내야함? 매칭 진행중인/또는 실패한 매칭도 보내야함?
-                matching_json = {
-                    "id" : matching.id,
-                    "name" : matching.matzip.name,
-                    #"bio" : matching.bio,
-                    #"created_time" : matching.created_time.strftime("%Y-%m-%d %H:%M:%S"),
-                    #"remain" : matching.max_people-len(follower_json_all),
-                    #"is_matched" : matching.is_matched,
-                    #"is_closed" : matching.is_closed,
-                    #"social_mode" : matching.social_mode,
-                    #"desired_gender" : matching.desired_gender,
-                    #"desired_major" : matching.desired_major,
-                    #"min_people" : matching.min_people,
-                    #"max_people" : matching.max_people,
-                    "date" : matching.start_time.strftime("%Y-%m-%d %H:%M"),
-                    #"end_time" : matching.end_time.strftime("%Y-%m-%d %H:%M"),
-                    #"duration" : matching.duration,
-                    "leader" : matching.leader.nickname,
-			        "follower": follower_json_all 
-                }
-                matching_json_all.append(matching_json)
+                #is_closed=true, is_matched=false 걸러줘야 한다.
+                if(matching.is_matched == False and matching.is_closed == True):
+                    pass
+                else:
+                    follower_all = Follower.objects.filter(matching = matching.id)
+                    
+                    follower_json_all=[]
+                    for follower in follower_all:
+                        follower_json_all.append(follower.profile.nickname)
+                    
+                   
+                    matching_json = {
+                        "id" : matching.id,
+                        "name" : matching.matzip.name,
+                        #"bio" : matching.bio,
+                        #"is_matched" : matching.is_matched,
+                        #"is_closed" : matching.is_closed,
+                        #"social_mode" : matching.social_mode,
+                        #"desired_gender" : matching.desired_gender,
+                        #"desired_major" : matching.desired_major,
+                        #"min_people" : matching.min_people,
+                        #"max_people" : matching.max_people,
+                        "date" : matching.start_time.strftime("%Y-%m-%d %H:%M"),
+                        #"end_time" : matching.end_time.strftime("%Y-%m-%d %H:%M"),
+                        #"duration" : matching.duration,
+                        "leader" : matching.leader.nickname,
+                        "follower": follower_json_all 
+                    }
+                    matching_json_all.append(matching_json)
     
             return HttpResponse(
                 json.dumps(
@@ -194,11 +196,15 @@ def get_nicknames(request):
 def create_report(request):
     if request.method == 'POST':
         body = json.loads(request.body.decode('utf-8'))
-        target = Profile.objects.filter(nickname=body['target'])
+        target_profile = Profile.objects.get(nickname=body['target'])
         report_type = body["type"]
         matching_id = body["id"]
-        reporter = request.user
-        duplic = Report.objects.get(id=matching_id, reporter=reporter, target=target)
+        reporter_profile = request.user.profile
+        #duplic = Report.objects.get(id=matching_id, reporter=reporter, target=target)
+        try:
+            duplic = Report.objects.get(id=matching_id, reporter=reporter_profile, target=target_profile)
+        except Report.DoesNotExist:
+            duplic = None
         
         if duplic != None:
             json_res = json.dumps(
@@ -218,33 +224,33 @@ def create_report(request):
         else:
             if report_type == 1: #비매너
                 report_type = "rudeness"
-                target.rudeness+=1
+                target_profile.rudeness+=1
                 # 비매너 횟수 5회 이상이면 일정기간 정지
-                if (target.rudeness//5)>=1 and (target.rudeness%3)==0:
-                    target.is_disabled = True
-                    target.release_date = date.today()+timedelta(weeks=3)
-                    target.save()      
+                if (target_profile.rudeness//5)>=1 and (target_profile.rudeness%3)==0:
+                    target_profile.is_disabled = True
+                    target_profile.release_date = date.today()+timedelta(weeks=3)
+                    target_profile.save()      
             elif report_type == 2: #노쇼
                 report_type = "no-show"
-                target.noshow+=1
+                target_profile.noshow+=1
                 # 노쇼 횟수 3회 이상이면 일정기간 정지
-                if (target.noshow//3)>=1 and (target.noshow%3)==0:
-                    target.is_disabled = True
-                    target.release_date = date.today()+timedelta(weeks=3)
-                    target.save()
-                elif (target.noshow//3)>=3 and (target.noshow%3)==0:
-                    target.is_disabled = True
-                    target.release_date = date.today()+timedelta(weeks=2400)
-                    target.save()
+                if (target_profile.noshow//3)>=1 and (target_profile.noshow%3)==0:
+                    target_profile.is_disabled = True
+                    target_profile.release_date = date.today()+timedelta(weeks=3)
+                    target_profile.save()
+                elif (target_profile.noshow//3)>=3 and (target_profile.noshow%3)==0:
+                    target_profile.is_disabled = True
+                    target_profile.release_date = date.today()+timedelta(weeks=2400)
+                    target_profile.save()
             elif report_type == 3: #정보와 다른 사람
                 report_type="deception"
-                target.is_disabled = True
-                target.release_date = date.today()+timedelta(weeks=2400)
-                target.save()
+                target_profile.is_disabled = True
+                target_profile.release_date = date.today()+timedelta(weeks=2400)
+                target_profile.save()
 
             new_report = Report.objects.create(   
-                reporter = reporter,
-                target = target,
+                reporter = reporter_profile,
+                target = target_profile,
                 reason = body['desc'],
                 type = report_type,
             )

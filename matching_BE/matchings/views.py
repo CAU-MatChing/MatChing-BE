@@ -46,23 +46,7 @@ def create_matching(request):
             cur_matzip.waiting+=1
             cur_matzip.save()
 
-            # new_matching_json = {
-            #     "leader" : new_matching.leader.nickname,
-            #     "matzip" : new_matching.matzip.name,
-            #     "created_time" : new_matching.created_time.strftime("%Y-%m-%d %H:%M:%S"),
-            #     "is_matched" : new_matching.is_matched,
-            #     "is_closed" : new_matching.is_closed,
-            #     "bio" : new_matching.bio,
-            #     "social_mode" : new_matching.social_mode,
-            #     "desired_gender" : new_matching.desired_gender,
-            #     "desired_major" : new_matching.desired_major,
-            #     "min_people" : new_matching.min_people,
-            #     "max_people" : new_matching.max_people,
-            #     "start_time" : new_matching.start_time.strftime("%Y-%m-%d %H:%M"),
-            #     "end_time" : new_matching.end_time.strftime("%Y-%m-%d %H:%M"),
-            #     "duration" : new_matching.duration
-            # }
-
+            
             return JsonResponse({"success":True}, status=200)
 
         else:
@@ -208,7 +192,7 @@ def join_matching(request, matching_id):
                     )
             
             # 리더가 설정한 전공 조건에 맞는지 검사
-            if(cur_matching.desired_major != '무관'):
+            if(cur_matching.desired_major != 'all'):
                 if(cur_matching.desired_major != cur_user_profile.major):
                     json_res = json.dumps(
                         {
@@ -235,6 +219,8 @@ def join_matching(request, matching_id):
 
             if cur_matching.min_people <= len(follower_all):
                 cur_matching.is_matched = True
+                cur_matching.matzip.matched+=1
+                cur_matching.matzip.save()
             else:
                 cur_matching.is_matched = False
                 
@@ -263,75 +249,10 @@ def join_matching(request, matching_id):
                 status=200
             )
 
-# 팔로워가 매칭을 취소하는 코드
-@require_http_methods(['DELETE'])
-def cancel_matching(request, matching_id):  
-    if request.method == 'DELETE':
-        if request.user.is_authenticated:
-            cur_matching = get_object_or_404(Matching, pk=matching_id)
-            cur_follower = get_object_or_404(Follower, profile=request.user.profile, matching = cur_matching)
-            
-            
-            time_now = datetime.now() 
-            time_limit = cur_matching.start_time + timedelta(hours=-1)
-            
-            
-            if time_now < time_limit:
-                cur_follower.delete()           
-                
-                follower_all = Follower.objects.filter(matching = cur_matching)
-                if cur_matching.min_people <= len(follower_all):
-                    cur_matching.is_matched = True
-                else:
-                    cur_matching.is_matched = False
-                    
-                if cur_matching.max_people <= len(follower_all):
-                    cur_matching.is_closed = True
-                else:
-                    cur_matching.is_closed = False
-
-                cur_matching.save()
-            
-                cur_profile = get_object_or_404(Profile, account = request.user)
-                cur_profile.cancel+=1
-                cur_profile.save()
-                
-                return JsonResponse({"success":True}, status=200)
-
-                
-            else:
-                json_res = json.dumps(
-                    {
-                        "success": False,
-                        "errorMessage": "매칭취소시간지남"
-                    },
-                    ensure_ascii=False
-                )
-                
-                return HttpResponse(
-                    json_res,
-                    content_type=u"application/json; charset=utf-8",
-                    status=200
-                )
-
-        else:
-            json_res = json.dumps(
-                {
-                    "success": False,
-                    "errorMessage": "사용자인증실패"
-                },
-                ensure_ascii=False
-            )
-                
-            return HttpResponse(
-                json_res,
-                content_type=u"application/json; charset=utf-8",
-                status=200
-            )
             
 # 팔로워가 매칭을 취소하는 코드 - 수정본(위에꺼는 수정전), url 추가는 안하고 함수만 새로 작성
 @require_http_methods(['DELETE'])
-def cancel_matching2(request, matching_id):  
+def cancel_matching(request, matching_id):  
     if request.method == 'DELETE':
         if request.user.is_authenticated:
             cur_matching = get_object_or_404(Matching, pk=matching_id)
