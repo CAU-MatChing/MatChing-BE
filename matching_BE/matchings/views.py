@@ -264,7 +264,6 @@ def join_matching(request, matching_id):
             )
 
 # 팔로워가 매칭을 취소하는 코드
-#민경이랑 url합의
 @require_http_methods(['DELETE'])
 def cancel_matching(request, matching_id):  
     if request.method == 'DELETE':
@@ -314,6 +313,62 @@ def cancel_matching(request, matching_id):
                     content_type=u"application/json; charset=utf-8",
                     status=200
                 )
+
+        else:
+            json_res = json.dumps(
+                {
+                    "success": False,
+                    "errorMessage": "사용자인증실패"
+                },
+                ensure_ascii=False
+            )
+                
+            return HttpResponse(
+                json_res,
+                content_type=u"application/json; charset=utf-8",
+                status=200
+            )
+            
+# 팔로워가 매칭을 취소하는 코드 - 수정본(위에꺼는 수정전), url 추가는 안하고 함수만 새로 작성
+@require_http_methods(['DELETE'])
+def cancel_matching2(request, matching_id):  
+    if request.method == 'DELETE':
+        if request.user.is_authenticated:
+            cur_matching = get_object_or_404(Matching, pk=matching_id)
+            user_profile = request.user.profile
+            
+            #리더와 같은지 먼저 검사
+            if cur_matching.leader == user_profile:
+                #매칭 삭제되면 다른것도 다 알아서 삭제되겠지?
+                cur_matching.delete()
+                #맛집 웨이팅 빼주기
+                cur_matzip = cur_matching.matzip
+                cur_matzip.waiting -= 1
+                cur_matzip.save()
+            else:
+                #팔로워 검사
+                cur_follower = get_object_or_404(Follower, profile=user_profile, matching = cur_matching)
+                cur_follower.delete()
+                
+                #팔로워 취소로 인한 매칭정보 갱신
+                follower_all = Follower.objects.filter(matching = cur_matching)
+                if cur_matching.min_people <= len(follower_all):
+                    cur_matching.is_matched = True
+                else:
+                    cur_matching.is_matched = False
+                    
+                if cur_matching.max_people <= len(follower_all):
+                    cur_matching.is_closed = True
+                else:
+                    cur_matching.is_closed = False
+
+                cur_matching.save()
+                
+            cur_profile = get_object_or_404(Profile, account = request.user)
+            cur_profile.cancel+=1
+            cur_profile.save()
+                      
+            return JsonResponse({"success":True}, status=200)
 
         else:
             json_res = json.dumps(
