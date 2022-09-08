@@ -171,7 +171,7 @@ def join_matching(request, matching_id):
                 return HttpResponse(
                     json_res,
                     content_type=u"application/json; charset=utf-8",
-                    status=400
+                    status=200
                 )
 
             # 이미 신청한 매칭을 중복 신청한 경우 검사
@@ -187,7 +187,7 @@ def join_matching(request, matching_id):
                 return HttpResponse(
                     json_res,
                     content_type=u"application/json; charset=utf-8",
-                    status=400
+                    status=200
                 )
 
             # 리더가 설정한 성별 조건에 맞는지 검사
@@ -204,7 +204,7 @@ def join_matching(request, matching_id):
                     return HttpResponse(
                         json_res,
                         content_type=u"application/json; charset=utf-8",
-                        status=400
+                        status=200
                     )
             
             # 리더가 설정한 전공 조건에 맞는지 검사
@@ -221,7 +221,7 @@ def join_matching(request, matching_id):
                     return HttpResponse(
                         json_res,
                         content_type=u"application/json; charset=utf-8",
-                        status=400
+                        status=200
                     )
         
         
@@ -311,7 +311,7 @@ def cancel_matching(request, matching_id):
                 return HttpResponse(
                     json_res,
                     content_type=u"application/json; charset=utf-8",
-                    status=400
+                    status=200
                 )
 
         else:

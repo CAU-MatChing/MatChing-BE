@@ -74,28 +74,28 @@ def sign_up(request) :
                 {
                     "success" : False,
                     "errorMessage" : "Integrity_Error"                
-                }, status=400
+                }, status=200
             )
         except KeyError:
             return JsonResponse(
                 {
                     "success" : False,
                     "errorMessage" : "INVALID_KEY"
-                }, status=400
+                }, status=200
             )
         except TypeError:
             return JsonResponse(
                 {
                     "success" : False,
                     "errorMessage" : "INVALID_TYPE"
-                }, status=400
+                }, status=200
             )
         except ValidationError:
             return JsonResponse(
                 {
                     "success" : False,
                     "errorMessage" : "VALIDATION_ERROR"
-                }, status=400
+                }, status=200
             )
         
 def activate(request, uidb64, token) :
@@ -114,7 +114,7 @@ def activate(request, uidb64, token) :
                 {
                     "success" : False,
                     "errorMessage" : "AUTH FAIL"
-                }, status=400
+                }, status=200
             )
 
         except ValidationError:
@@ -122,14 +122,14 @@ def activate(request, uidb64, token) :
                 {
                     "success" : False,
                     "errorMessage" : "TYPE_ERROR"
-                }, status=400
+                }, status=200
             )
         except KeyError:
             return JsonResponse(
                 {
                     "success" : False,
                     "errorMessage" : "INVALID_KEY"
-                }, status=400
+                }, status=200
             )
 
 
@@ -162,7 +162,7 @@ def login(request) :
                     return HttpResponse(
                         json_res,
                         content_type=u"application/json; charset=utf-8",
-                        status=400
+                        status=200
                     )
                 
                 else:
@@ -194,7 +194,7 @@ def login(request) :
             return HttpResponse(
                 json_res,
                 content_type=u"application/json; charset=utf-8",
-                status=400
+                status=200
             )
 
 @require_http_methods(['POST'])
@@ -242,3 +242,11 @@ def delete_account(request):
             content_type=u"application/json; charset=utf-8",
             status=401
         )
+
+
+@require_http_methods(['GET'])
+def check_login(request):
+    if request.user.is_authenticated():
+        return JsonResponse({"success": True},status=200)
+    else:
+        return JsonResponse({"success" : False},status=401)

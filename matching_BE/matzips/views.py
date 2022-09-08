@@ -6,8 +6,8 @@ from .models import *
 from matchings.models import *
 import json
 
-@require_http_methods(['POST'])
-def create_matzip(request):
+@require_http_methods(['POST','GET'])
+def create_get_matzip(request):
     if request.method == 'POST':
         if request.user.is_authenticated:
             body = json.loads(request.body.decode('utf-8'))
@@ -24,7 +24,7 @@ def create_matzip(request):
                 return HttpResponse(
                     json_res,
                     content_type=u"application/json; charset=utf-8",
-                    status=400
+                    status=200
                 )
 
             new_matzip = Matzip.objects.create(
@@ -52,6 +52,28 @@ def create_matzip(request):
                 content_type=u"application/json; charset=utf-8",
                 status=401
             )
+
+    elif request.method == 'GET':
+        matzip_all = Matzip.objects.all()
+
+        matzip_name_list = []
+        for matzip in matzip_all:
+            matzip_name_list.append(matzip.name)
+        
+        json_res = json.dumps(
+            {
+                "success": True,
+                "resList" : matzip_name_list
+            },
+            ensure_ascii=False
+        )
+            
+        return HttpResponse(
+            json_res,
+            content_type=u"application/json; charset=utf-8",
+            status=200
+        )
+
 
 
 #민경이가 안쓸듯
@@ -87,6 +109,7 @@ def get_delete_matzip(request, id):
             content_type=u"application/json; charset=utf-8",
             status=200
         )
+
 
 # 현재 맛집 및 매칭 정보 응답
 @require_http_methods(['GET'])  
