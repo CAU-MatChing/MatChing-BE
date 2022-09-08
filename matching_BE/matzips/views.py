@@ -50,7 +50,7 @@ def create_get_matzip(request):
             return HttpResponse(
                 json_res,
                 content_type=u"application/json; charset=utf-8",
-                status=401
+                status=200
             )
 
     elif request.method == 'GET':

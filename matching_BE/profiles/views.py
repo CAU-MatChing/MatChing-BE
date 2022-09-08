@@ -162,7 +162,7 @@ def get_my_matchings(request):
             return HttpResponse(
                 json_res,
                 content_type=u"application/json; charset=utf-8",
-                status=401
+                status=200
             )
 
         

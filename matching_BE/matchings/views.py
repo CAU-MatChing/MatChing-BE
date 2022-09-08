@@ -77,7 +77,7 @@ def create_matching(request):
             return HttpResponse(
                 json_res,
                 content_type=u"application/json; charset=utf-8",
-                status=401
+                status=200
             )
         
 
@@ -260,7 +260,7 @@ def join_matching(request, matching_id):
             return HttpResponse(
                 json_res,
                 content_type=u"application/json; charset=utf-8",
-                status=401
+                status=200
             )
 
 # 팔로워가 매칭을 취소하는 코드
@@ -271,11 +271,12 @@ def cancel_matching(request, matching_id):
         if request.user.is_authenticated:
             cur_matching = get_object_or_404(Matching, pk=matching_id)
             cur_follower = get_object_or_404(Follower, profile=request.user.profile, matching = cur_matching)
-
+            
+            
             time_now = datetime.now() 
             time_limit = cur_matching.start_time + timedelta(hours=-1)
             
-
+            
             if time_now < time_limit:
                 cur_follower.delete()           
                 
@@ -291,7 +292,7 @@ def cancel_matching(request, matching_id):
                     cur_matching.is_closed = False
 
                 cur_matching.save()
-
+            
                 cur_profile = get_object_or_404(Profile, account = request.user)
                 cur_profile.cancel+=1
                 cur_profile.save()
@@ -326,5 +327,5 @@ def cancel_matching(request, matching_id):
             return HttpResponse(
                 json_res,
                 content_type=u"application/json; charset=utf-8",
-                status=401
+                status=200
             )

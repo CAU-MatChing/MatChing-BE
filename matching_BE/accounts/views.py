@@ -217,7 +217,7 @@ def logout(request):
         return HttpResponse(
             json_res,
             content_type=u"application/json; charset=utf-8",
-            status=401
+            status=200
         )
 
 @require_http_methods(['POST'])
@@ -240,7 +240,7 @@ def delete_account(request):
         return HttpResponse(
             json_res,
             content_type=u"application/json; charset=utf-8",
-            status=401
+            status=200
         )
 
 
@@ -249,4 +249,4 @@ def check_login(request):
     if request.user.is_authenticated():
         return JsonResponse({"success": True},status=200)
     else:
-        return JsonResponse({"success" : False},status=401)
+        return JsonResponse({"success" : False},status=200)
