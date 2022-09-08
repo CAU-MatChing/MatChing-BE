@@ -216,11 +216,14 @@ def create_report(request):
             )
         
         else:
-            #민경이랑 합의하기 : 일정수 이상이면 정지하자!
             if report_type == 1: #비매너
                 report_type = "rudeness"
                 target.rudeness+=1
-                # 80퍼센트 넘으면 3주 정지
+                # 비매너 횟수 5회 이상이면 일정기간 정지
+                if (target.rudeness//5)>=1 and (target.rudeness%3)==0:
+                    target.is_disabled = True
+                    target.release_date = date.today()+timedelta(weeks=3)
+                    target.save()      
             elif report_type == 2: #노쇼
                 report_type = "no-show"
                 target.noshow+=1
