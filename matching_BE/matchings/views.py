@@ -36,8 +36,8 @@ def create_matching(request):
                 social_mode = body['mode'],
                 desired_gender = body['gender'],
                 desired_major = body['major'],
-                min_people = body['min'],
-                max_people = body['max'],
+                min_people = body['min']-1,
+                max_people = body['max']-1,
                 start_time = start,
                 end_time = end,
                 duration = body['duration']
