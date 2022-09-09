@@ -15,9 +15,17 @@ class Profile(models.Model):
 	matching_people = models.IntegerField(default=0)
 	is_disabled = models.BooleanField(default=False)
 	release_date = models.DateField()
- 
+	
+	def __str__(self):
+		return self.nickname
+
 class Report(models.Model):
-	type = models.CharField(max_length=31,default='')
+	TYPE_CHOICES = (
+		('no-show','노쇼'),
+		('rudeness','비매너'),
+		('deception','정보와 다른 사람'),
+	)
+	type = models.CharField(max_length=31,default='',choices=TYPE_CHOICES)
 	reporter = models.ForeignKey(Profile,related_name="reporter", on_delete=models.PROTECT)
 	target = models.ForeignKey(Profile, related_name="target",on_delete=models.PROTECT)
 	reason = models.TextField()

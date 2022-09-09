@@ -20,6 +20,8 @@ class Matching(models.Model):
     end_time = models.DateTimeField()
     duration = models.CharField(default='00시간00분',max_length=15)
 
+    def __str__(self):
+        return str(self.matzip)+" (id:"+str(self.id)+")"
 
 class Follower(models.Model):
     matching = models.ForeignKey(Matching, on_delete=models.CASCADE)
