@@ -156,12 +156,14 @@ def getall_now_matzip(request):
                         "startTime" : now_matching.start_time.strftime("%Y-%m-%d %H:%M"),
                         "endTime" : now_matching.end_time.strftime("%Y-%m-%d %H:%M"),
                         "duration" : now_matching.duration,
-                        "max" : now_matching.max_people,
-                        "min" : now_matching.min_people, 
+                        "max" : now_matching.max_people+1,
+                        "min" : now_matching.min_people+1, 
                         "id" : now_matching.id,
                         "description" : now_matching.bio,
                         "leader" : now_matching.leader.nickname, 
-                        "follower": now_follower_json_all 
+                        "follower": now_follower_json_all,
+                        "is_matched": now_matching.is_matched,
+                        "is_closed": now_matching.is_closed
                     }
                     now_matching_json_all.append(now_matching_json)
                 
