@@ -120,6 +120,7 @@ def get_my_matchings(request):
                     follower_all = Follower.objects.filter(matching = matching.id)
                     
                     member_json_all=[]
+                    member_json_all.append(matching.leader.nickname)
                     #follower_json_all=[]
                     for follower in follower_all:
                         if follower.profile.nickname != my_profile.nickname:
