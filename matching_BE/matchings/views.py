@@ -192,7 +192,7 @@ def join_matching(request, matching_id):
                     )
             
             # 리더가 설정한 전공 조건에 맞는지 검사
-            if(cur_matching.desired_major != 'all'):
+            if(cur_matching.desired_major != '학과 무관'):
                 if(cur_matching.desired_major != cur_user_profile.major):
                     json_res = json.dumps(
                         {
