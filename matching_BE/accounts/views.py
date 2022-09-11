@@ -108,7 +108,7 @@ def activate(request, uidb64, token) :
                 user.is_active = True
                 user.save()
 
-                return redirect('http://localhost:3000/signup/success') #리다이렉트 페이지
+                return redirect('https://github.com/hectick') #리다이렉트 페이지
             else:
                 return JsonResponse(
                     {
