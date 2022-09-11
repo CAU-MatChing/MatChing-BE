@@ -108,12 +108,12 @@ def activate(request, uidb64, token) :
                 user.is_active = True
                 user.save()
 
-                return redirect('http://localhost:3000/signup/success') #리다이렉트 페이지
+                return redirect('http://www.mat-ching.kro.kr:8000/signup/success') #리다이렉트 페이지
             else:
                 return JsonResponse(
                     {
                         "success" : False,
-                        "errorMessage" : "AUTH FAIL"
+                        "errorMessage" : "AUTH_FAIL"
                     }, status=200
                 )
 
