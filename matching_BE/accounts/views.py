@@ -98,7 +98,7 @@ def sign_up(request) :
                 }, status=200
             )
         
-def activate(request, uidb64, token) :
+def activate2(request, uidb64, token) :
     if request.method == 'GET':
         try:
             uid  = force_str(urlsafe_base64_decode(uidb64))
@@ -114,6 +114,45 @@ def activate(request, uidb64, token) :
                     {
                         "success" : False,
                         "errorMessage" : "AUTH FAIL"
+                    }, status=200
+                )
+
+        except ValidationError:
+            return JsonResponse(
+                {
+                    "success" : False,
+                    "errorMessage" : "TYPE_ERROR"
+                }, status=200
+            )
+        except KeyError:
+            return JsonResponse(
+                {
+                    "success" : False,
+                    "errorMessage" : "INVALID_KEY"
+                }, status=200
+            )
+            
+            
+def activate(request, uidb64, token) :
+    if request.method == 'GET':
+        try:
+            uid  = force_str(urlsafe_base64_decode(uidb64))
+            user = Account.objects.get(pk=uid)
+            
+            if account_activation_token.check_token(user, token):
+                user.is_active = True
+                user.save()
+
+                return JsonResponse(
+                    {
+                        "success" : True,
+                    }, status=200
+                )
+            else:
+                return JsonResponse(
+                    {
+                        "success" : False,
+                        "errorMessage" : "UnknownError"
                     }, status=200
                 )
 
