@@ -76,15 +76,15 @@ def get_my_matchings(request):
             for matching in matching_leader_all:
                 follower_all = Follower.objects.filter(matching = matching.id)
                 
-                follower_json_all=[]
+                member_json_all=[]
                 for follower in follower_all:
-                    follower_json_all.append(follower.profile.nickname)
-                    
+                    member_json_all.append(follower.profile.nickname)
+                
+                
                 matching_json = {
                     "id" : matching.id,
                     "name" : matching.matzip.name,
                     #"bio" : matching.bio,
-                    "leader" : matching.leader.nickname,
                     #"created_time" : matching.created_time.strftime("%Y-%m-%d %H:%M:%S"),
                     #"remain" : matching.max_people-len(follower_json_all),
                     "is_matched" : matching.is_matched,
@@ -97,7 +97,9 @@ def get_my_matchings(request):
                     "date" : matching.start_time.strftime("%Y-%m-%d %H:%M"),
                     #"end_time" : matching.end_time.strftime("%Y-%m-%d %H:%M"),
                     #"duration" : matching.duration,
-			        "follower": follower_json_all 
+                    #"leader" : matching.leader.nickname,
+			        #"follower": follower_json_all,
+                    "member" : member_json_all
                 }
                 matching_json_all.append(matching_json)
             
@@ -117,9 +119,11 @@ def get_my_matchings(request):
                 else:
                     follower_all = Follower.objects.filter(matching = matching.id)
                     
-                    follower_json_all=[]
+                    member_json_all=[]
+                    #follower_json_all=[]
                     for follower in follower_all:
-                        follower_json_all.append(follower.profile.nickname)
+                        if follower.profile.nickname != my_profile.nickname:
+                            member_json_all.append(follower.profile.nickname)
                     
                    
                     matching_json = {
@@ -136,8 +140,9 @@ def get_my_matchings(request):
                         "date" : matching.start_time.strftime("%Y-%m-%d %H:%M"),
                         #"end_time" : matching.end_time.strftime("%Y-%m-%d %H:%M"),
                         #"duration" : matching.duration,
-                        "leader" : matching.leader.nickname,
-                        "follower": follower_json_all 
+                        #"leader" : matching.leader.nickname,
+                        #"follower": follower_json_all,
+                        "member" : member_json_all 
                     }
                     matching_json_all.append(matching_json)
     

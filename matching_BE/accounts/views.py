@@ -145,7 +145,7 @@ def activate(request, uidb64, token) :
 
                 return JsonResponse(
                     {
-                        "success" : True,
+                        "success" : True
                     }, status=200
                 )
             else:
