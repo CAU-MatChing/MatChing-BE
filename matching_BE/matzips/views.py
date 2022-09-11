@@ -162,8 +162,8 @@ def getall_now_matzip(request):
                         "description" : now_matching.bio,
                         "leader" : now_matching.leader.nickname, 
                         "follower": now_follower_json_all,
-                        "is_matched": now_matching.is_matched,
-                        "is_closed": now_matching.is_closed
+                        #"is_matched": now_matching.is_matched,
+                        #"is_closed": now_matching.is_closed
                     }
                     now_matching_json_all.append(now_matching_json)
                 
