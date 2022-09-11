@@ -53,7 +53,7 @@ def create_matching(request):
             json_res = json.dumps(
                 {
                     "success": False,
-                    "errorMessage": "사용자인증실패"
+                    "errorMessage": "로그인이 필요합니다."
                 },
                 ensure_ascii=False
             )
@@ -147,7 +147,7 @@ def join_matching(request, matching_id):
                 json_res = json.dumps(
                         {
                             "success": False,
-                            "errorMessage": "리더와 팔로워가 동일함"
+                            "errorMessage": "본인이 생성한 맛칭은 신청할 수 없습니다."
                         },
                         ensure_ascii=False
                     )
@@ -163,7 +163,7 @@ def join_matching(request, matching_id):
                 json_res = json.dumps(
                         {
                             "success": False,
-                            "errorMessage": "매칭 중복 신청"
+                            "errorMessage": "이미 신청한 맛칭입니다."
                         },
                         ensure_ascii=False
                     )
@@ -180,7 +180,7 @@ def join_matching(request, matching_id):
                     json_res = json.dumps(
                         {
                             "success": False,
-                            "errorMessage": "성별조건불일치"
+                            "errorMessage": "성별 조건이 일치하지 않습니다."
                         },
                         ensure_ascii=False
                     )
@@ -197,7 +197,7 @@ def join_matching(request, matching_id):
                     json_res = json.dumps(
                         {
                             "success": False,
-                            "errorMessage": "전공조건불일치"
+                            "errorMessage": "전공 조건이 일치하지 않습니다."
                         },
                         ensure_ascii=False
                     )
@@ -238,7 +238,7 @@ def join_matching(request, matching_id):
             json_res = json.dumps(
                 {
                     "success": False,
-                    "errorMessage": "사용자인증실패"
+                    "errorMessage": "로그인이 필요합니다."
                 },
                 ensure_ascii=False
             )
@@ -295,7 +295,7 @@ def cancel_matching(request, matching_id):
             json_res = json.dumps(
                 {
                     "success": False,
-                    "errorMessage": "사용자인증실패"
+                    "errorMessage": "로그인이 필요합니다."
                 },
                 ensure_ascii=False
             )
