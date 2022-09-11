@@ -109,13 +109,13 @@ def activate(request, uidb64, token) :
                 user.save()
 
                 return redirect('http://localhost:3000/signup/success') #리다이렉트 페이지
-        
-            return JsonResponse(
-                {
-                    "success" : False,
-                    "errorMessage" : "AUTH FAIL"
-                }, status=200
-            )
+            else:
+                return JsonResponse(
+                    {
+                        "success" : False,
+                        "errorMessage" : "AUTH FAIL"
+                    }, status=200
+                )
 
         except ValidationError:
             return JsonResponse(
