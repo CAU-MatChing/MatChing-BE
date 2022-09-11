@@ -144,11 +144,19 @@ def getall_now_matzip(request):
                 now_matching_json_all=[]
                 for now_matching in now_matching_all:
                     now_follower_all = Follower.objects.filter(matching = now_matching.id)
+                    now_matching_leader = now_matching.leader
+                    leader_nickname = now_matching.leader.nickname
+                    leader_major = now_matching.leader.major
+                    if now_matching_leader.gender == 'F':
+                        leader_gender = "여성"
+                    elif now_matching_leader.gender == 'M':
+                        leader_gender = "남성"
                     
                     now_follower_json_all=[]
                     for now_follower in now_follower_all:
                         now_follower_json_all.append(now_follower.profile.nickname)
                     
+                    leader_data = leader_nickname+"("+leader_major+","+leader_gender+")"
                     #gender, mode는 우리쪽에서 한글로 바꿔서 보낼수도 있음
                     tag = [now_matching.desired_gender,now_matching.desired_major,now_matching.social_mode]
                     now_matching_json = {
@@ -160,10 +168,8 @@ def getall_now_matzip(request):
                         "min" : now_matching.min_people+1, 
                         "id" : now_matching.id,
                         "description" : now_matching.bio,
-                        "leader" : now_matching.leader.nickname, 
-                        "follower": now_follower_json_all,
-                        #"is_matched": now_matching.is_matched,
-                        #"is_closed": now_matching.is_closed
+                        "leader" : leader_data,
+                        "follower": now_follower_json_all
                     }
                     now_matching_json_all.append(now_matching_json)
                 
