@@ -15,7 +15,7 @@ from django.core.exceptions          import ValidationError
 from django.core.validators          import validate_email
 from django.db                       import IntegrityError
 from django.contrib.sites.shortcuts  import get_current_site
-from django.shortcuts                import render, redirect
+from django.shortcuts                import redirect
 from django.utils.encoding           import force_bytes, force_str
 from django.utils.http               import urlsafe_base64_encode,urlsafe_base64_decode
 from django.contrib.auth             import login as auth_login, logout as auth_logout,authenticate
@@ -24,7 +24,6 @@ from datetime                        import date
 import smtplib
 from email.mime.text import MIMEText
 
-# Create your views here.
 
 def sign_up(request) :
     if request.method == 'POST':
